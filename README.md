@@ -35,3 +35,23 @@ The word "it" is something we want to keep alive.
 - A marriage, you try to keep it working, but you're making a game during your wife's birthday.
 - Draw a heart monitor pulse to keep the patient alive.
 - Keep the beat alive as a drummer
+
+Level 1 = find the 1
+Level 2 = find the 1+1
+Level 3 = find the 2+1
+Level 4 = find the 2+2, 2+1
+Level 5 = find the 2+3, 4+1
+Level 6 = find the 5+1, 4+2, 3+3
+
+But what does math have anything to do with keeping something alive....
+
+Maybe a grid, you're a unicorn with a number goal
+
+1 2 3 4 5
+4 3 2 1 5
+7 6 5 5 3
+9 8 5 3 2
+7 3 5 u 2
+
+Follow
+
