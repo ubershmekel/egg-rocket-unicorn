@@ -1,37 +1,20 @@
-Welcome to Glitch
-=================
+# Ideas for Ludum Dare 46
 
-Click `Show` in the header to see your app live. Updates to your code will instantly deploy and update live.
+The theme is "Keep it alive".
 
-**Glitch** is the friendly community where you'll build the app of your dreams. Glitch lets you instantly create, remix, edit, and host an app, bot or site, and you can invite collaborators or helpers to simultaneously edit code with you.
+# Keep it alive ideas
 
-Find out more [about Glitch](https://glitch.com/about).
+* A patient that's dying, and you have to constantly treat different parts
+* Turn based bullet hell. A person walking through a simple maze, but every step can mean death from a trap, bullet, etc.
+
+I would like to constrain myself:
+
+* Simplest code and engine possible, to make it easy to learn from.
+* My kids, aged 7 and under, can play
+* Preferably with characters they like: rocket, robot, unicorn, puppy
+* Health and Corona virus are going to be cliche themes I'd rather avoid
+* Would be nice if they would learn some math or reading while playing.
 
 
-Your Project
-------------
 
-### ← README.md
 
-That's this file, where you can tell people what your cool website does and how you built it.
-
-### ← index.html
-
-Where you'll write the content of your website. 
-
-### ← style.css
-
-CSS files add styling rules to your content.
-
-### ← script.js
-
-If you're feeling fancy you can add interactivity to your site with JavaScript.
-
-### ← assets
-
-Drag in `assets`, like images or music, to add them to your project
-
-Made by [Glitch](https://glitch.com/)
--------------------
-
-\ ゜o゜)ノ
