@@ -2,10 +2,20 @@
 
 body {
   font-family: helvetica, arial, sans-serif;
-  margin: 2em;
+  margin: 1em;
 }
 
 h1 {
   font-style: italic;
   color: #373fff;
+}
+
+#phaser-container {
+  /*
+    height 80% because we don't want to make it to hard to scroll the
+    game window fully into view
+  */
+  height: 80%;
+  width: 100%;
+  margin: auto;
 }

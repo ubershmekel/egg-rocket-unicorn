@@ -50,7 +50,7 @@ class EggSaver extends Phaser.Scene {
     });
 
     this.ball = this.physics.add
-      .image(100, 100, "lander")
+      .image(400, 400, "lander")
       .setCollideWorldBounds(true)
       .setBounce(0.5);
     this.ball.setGravityY(200);
@@ -198,8 +198,8 @@ var config = {
     default: "arcade"
   },
   scale: {
-    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
   },
 };
 
