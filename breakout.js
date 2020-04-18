@@ -23,7 +23,7 @@ var Breakout = new Phaser.Class({
 
   create: function() {
     //  Enable world bounds, but disable the floor
-    this.physics.world.setBoundsCollision(true, true, true, false);
+    this.physics.world.setBoundsCollision(true, true, true, true);
 
     // debug text
     this.debugText = this.add.text(0, 0, 'Hello World', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
@@ -47,13 +47,13 @@ var Breakout = new Phaser.Class({
     this.ball = this.physics.add
       .image(400, 500, "lander")
       .setCollideWorldBounds(true)
-      .setBounce(1);
+      .setBounce(0.5);
     this.ball.setGravityY(300);
     this.ball.setData("onPaddle", true);
 
-    this.paddle = this.physics.add
+    /*this.paddle = this.physics.add
       .image(400, 550, "assets", "paddle1")
-      .setImmovable();
+      .setImmovable();*/
 
     //  Our colliders
     this.physics.add.collider(
@@ -76,11 +76,11 @@ var Breakout = new Phaser.Class({
       "pointermove",
       function(pointer) {
         //  Keep the paddle within the game
-        this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
+//         this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
 
-        if (this.ball.getData("onPaddle")) {
-          this.ball.x = this.paddle.x;
-        }
+//         if (this.ball.getData("onPaddle")) {
+//           this.ball.x = this.paddle.x;
+//         }
       },
       this
     );
@@ -107,7 +107,7 @@ var Breakout = new Phaser.Class({
 
   resetBall: function() {
     this.ball.setVelocity(0);
-    this.ball.setPosition(this.paddle.x, 500);
+    // this.ball.setPosition(this.paddle.x, 500);
     this.ball.setData("onPaddle", true);
   },
 
@@ -122,30 +122,31 @@ var Breakout = new Phaser.Class({
   hitPaddle: function(ball, paddle) {
     var diff = 0;
 
-    if (ball.x < paddle.x) {
-      //  Ball is on the left-hand side of the paddle
-      diff = paddle.x - ball.x;
-      ball.setVelocityX(-10 * diff);
-    } else if (ball.x > paddle.x) {
-      //  Ball is on the right-hand side of the paddle
-      diff = ball.x - paddle.x;
-      ball.setVelocityX(10 * diff);
-    } else {
-      //  Ball is perfectly in the middle
-      //  Add a little random X to stop it bouncing straight up!
-      ball.setVelocityX(2 + Math.random() * 8);
-    }
+//     if (ball.x < paddle.x) {
+//       //  Ball is on the left-hand side of the paddle
+//       diff = paddle.x - ball.x;
+//       ball.setVelocityX(-10 * diff);
+//     } else if (ball.x > paddle.x) {
+//       //  Ball is on the right-hand side of the paddle
+//       diff = ball.x - paddle.x;
+//       ball.setVelocityX(10 * diff);
+//     } else {
+//       //  Ball is perfectly in the middle
+//       //  Add a little random X to stop it bouncing straight up!
+//       ball.setVelocityX(2 + Math.random() * 8);
+//     }
   },
 
   update: function() {
     //console.log(this.ball.body.velocity.x);
     const cursorKeys = this.input.keyboard.createCursorKeys();
     const thrust = 700;
-    this.debugText.setText("angle " + this.ball.body.rotation)
+    this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
     if (cursorKeys.up.isDown) {
       // this.ball.body.applyForce({x: 0, y:100});
-      this.ball.body.acceleration.y = thrust * Math.cos(this.ball.body.rotation);
-      this.ball.body.acceleration.x = -thrust * Math.sin(this.ball.body.rotation);
+      const rads = this.ball.body.rotation * 180 / Math.PI;
+      this.ball.body.acceleration.y = (-thrust) * Math.cos(rads);
+      this.ball.body.acceleration.x = (-thrust) * Math.sin(rads);
     } else {
       this.ball.body.acceleration.y = 0;
       this.ball.body.acceleration.x = 0;
