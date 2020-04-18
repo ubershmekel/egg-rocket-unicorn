@@ -12,6 +12,8 @@ var Breakout = new Phaser.Class({
   },
 
   preload: function() {
+    this.load.svg('lander', 'images/combined-lander.svg');
+
     this.load.atlas(
       "assets",
       "assets/games/breakout/breakout.png",
@@ -39,7 +41,7 @@ var Breakout = new Phaser.Class({
     });
 
     this.ball = this.physics.add
-      .image(400, 500, "assets", "ball1")
+      .image(400, 500, "lander")
       .setCollideWorldBounds(true)
       .setBounce(1);
     this.ball.setData("onPaddle", true);
