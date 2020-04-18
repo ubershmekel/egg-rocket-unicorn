@@ -153,7 +153,7 @@ var Breakout = new Phaser.Class({
       // Thrust!
       this.thrust1.visible = true;
       this.thrust1.x = this.ball.body.x;
-      this.thrust1
+      this.thrust1.y = this.ball.body.y;
       // this.ball.body.applyForce({x: 0, y:100});
       const rads = this.ball.body.rotation * Math.PI / 180;
       this.ball.body.acceleration.y = (-thrust) * Math.cos(rads);
