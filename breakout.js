@@ -3,7 +3,7 @@
 var Breakout = new Phaser.Class({
   Extends: Phaser.Scene,
 
-  initialize: function Breakout() {
+  initialize() {
     Phaser.Scene.call(this, { key: "breakout" });
 
     this.bricks;
@@ -11,7 +11,7 @@ var Breakout = new Phaser.Class({
     this.ball;
   },
 
-  preload: function() {
+  preload() {
     this.load.svg('lander', 'images/combined-lander.svg');
     this.load.svg('thrust', 'images/thrust.svg');
 
@@ -22,7 +22,7 @@ var Breakout = new Phaser.Class({
     );
   },
 
-  create: function() {
+  create() {
     //  Enable world bounds, but disable the floor
     this.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -49,7 +49,7 @@ var Breakout = new Phaser.Class({
     });
 
     this.ball = this.physics.add
-      .image(400, 500, "lander")
+      .image(100, 100, "lander")
       .setCollideWorldBounds(true)
       .setBounce(0.5);
     this.ball.setGravityY(200);
@@ -60,6 +60,7 @@ var Breakout = new Phaser.Class({
       .image(400, 550, "assets", "paddle1")
       .setImmovable();*/
 
+
     //  Our colliders
     this.physics.add.collider(
       this.ball,
@@ -68,13 +69,13 @@ var Breakout = new Phaser.Class({
       null,
       this
     );
-    this.physics.add.collider(
-      this.ball,
-      this.paddle,
-      this.hitPaddle,
-      null,
-      this
-    );
+    // this.physics.add.collider(
+    //   this.ball,
+    //   this.paddle,
+    //   this.hitPaddle,
+    //   null,
+    //   this
+    // );
 
     //  Input events
     this.input.on(
@@ -90,19 +91,19 @@ var Breakout = new Phaser.Class({
       this
     );
 
-    this.input.on(
-      "pointerup",
-      function(pointer) {
-        if (this.ball.getData("onPaddle")) {
-          // this.ball.setVelocity(-75, -300);
-          this.ball.setData("onPaddle", false);
-        }
-      },
-      this
-    );
+    // this.input.on(
+    //   "pointerup",
+    //   function(pointer) {
+    //     if (this.ball.getData("onPaddle")) {
+    //       // this.ball.setVelocity(-75, -300);
+    //       this.ball.setData("onPaddle", false);
+    //     }
+    //   },
+    //   this
+    // );
   },
 
-  hitBrick: function(ball, brick) {
+  hitBrick(ball, brick) {
     brick.disableBody(true, true);
 
     if (this.bricks.countActive() === 0) {
@@ -110,13 +111,13 @@ var Breakout = new Phaser.Class({
     }
   },
 
-  resetBall: function() {
+  resetBall() {
     // this.ball.setVelocity(0);
     // this.ball.setPosition(this.paddle.x, 500);
     this.ball.setData("onPaddle", true);
   },
 
-  resetLevel: function() {
+  resetLevel() {
     this.resetBall();
 
     this.bricks.children.each(function(brick) {
@@ -124,7 +125,7 @@ var Breakout = new Phaser.Class({
     });
   },
 
-  hitPaddle: function(ball, paddle) {
+  hitPaddle(ball, paddle) {
     var diff = 0;
 
 //     if (ball.x < paddle.x) {
@@ -142,19 +143,17 @@ var Breakout = new Phaser.Class({
 //     }
   },
 
-  update: function() {
-    //console.log(this.ball.body.velocity.x);
+  handleKeys() {
     const cursorKeys = this.input.keyboard.createCursorKeys();
     const thrust = 700;
     const angleRate = 1.8;
-    
-    this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
     if (cursorKeys.up.isDown) {
       // Thrust!
       this.thrust1.visible = true;
       this.thrust1.x = this.ball.body.x;
       this.thrust1.y = this.ball.body.y;
-      // this.ball.body.applyForce({x: 0, y:100});
+      
+      // Apply thrust based on current rotation of egg
       const rads = this.ball.body.rotation * Math.PI / 180;
       this.ball.body.acceleration.y = (-thrust) * Math.cos(rads);
       this.ball.body.acceleration.x = (thrust) * Math.sin(rads);
@@ -164,19 +163,28 @@ var Breakout = new Phaser.Class({
       this.ball.body.acceleration.x = 0;
     }
     
+    // Rotate the egg
     if (cursorKeys.left.isDown) {
       this.ball.body.rotation -= angleRate;
     }
-
     if (cursorKeys.right.isDown) {
       this.ball.body.rotation += angleRate;
     }
+
+  },
+  
+  update() {
+    //console.log(this.ball.body.velocity.x);
+    
+    this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
+
+    this.handleKeys();
 
 
     if (this.ball.y > 600) {
       this.resetBall();
     }
-  }
+  },
 });
 
 var config = {
