@@ -3,6 +3,60 @@
 // const debug = true;
 const debug = false;
 
+class Button extends Phaser.GameObjects.Rectangle {
+  constructor({scene, x, y, width, height, text, bgColor, textColor, onClick, onRest}) {
+    super(scene, x, y);
+
+    const padding = 10;
+
+    scene.add.existing(this);
+    this.setOrigin(0, 0);
+
+    this.label = scene.add.text(x + padding, y + padding, text).setFontSize(18).setAlign('center');
+
+    // const labelWidth = this.label.width + padding;
+    // const labelHeight = this.label.height + padding;
+    // this.width = labelWidth >= minimumWidth ? labelWidth : minimumWidth;
+    // this.height = labelHeight >= minimumHeight ? labelHeight : minimumHeight;
+    this.width = width;
+    this.height = height;
+    this.bgColor = bgColor;
+    this.textColor = textColor;
+
+    this.setInteractive({ useHandCursor: true })
+      .on('pointerover', this.enterMenuButtonHoverState)
+      .on('pointerout', this.enterMenuButtonRestState)
+      .on('pointerdown', this.enterMenuButtonActiveState)
+      .on('pointerup', this.enterMenuButtonHoverState);
+
+      if (onClick) {
+        this.on('pointerdown', onClick);
+      }
+      if (onRest) {
+        this.on('pointerup', onRest);
+        this.on('pointerout', onRest)
+      }
+    
+    this.enterMenuButtonRestState();
+  }
+
+  enterMenuButtonHoverState() {
+    this.label.setColor('#000000');
+    this.setFillStyle(0x888888);
+  }
+
+  enterMenuButtonRestState() {
+    this.label.setColor('#FFFFFF');
+    this.setFillStyle(0x008888);
+  }
+
+  enterMenuButtonActiveState() {
+    this.label.setColor('#BBBBBB');
+    this.setFillStyle(0x444444);
+  }
+}
+
+
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -39,16 +93,14 @@ class Menu extends Phaser.Scene {
   }
 }
 
+const softKeys = {};
+
 class EggSaver extends Phaser.Scene {
 
   constructor (config) {
     super({
       key: "game",
     });
-
-    this.bricks;
-    this.paddle;
-    this.ball;
   }
 
   preload() {
@@ -61,6 +113,19 @@ class EggSaver extends Phaser.Scene {
   }
 
   create() {
+    this.leftButton = new Button({
+      scene: this,
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      text: "left",
+      bgColor: 0xff0000,
+      textColor: 0xffffff,
+      onClick: () => softKeys.left = true,
+      onRest: () => softKeys.left = false,
+    })
+
     //  Enable world bounds, but disable the floor
     this.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -260,9 +325,9 @@ function getActiveKeys(keyboard) {
   });
 
   return {
-    up: cursorKeys.up.isDown || wasd.up.isDown,
-    left: cursorKeys.left.isDown || wasd.left.isDown,
-    right: cursorKeys.right.isDown || wasd.right.isDown,
+    up: cursorKeys.up.isDown || wasd.up.isDown || softKeys.down,
+    left: cursorKeys.left.isDown || wasd.left.isDown || softKeys.left,
+    right: cursorKeys.right.isDown || wasd.right.isDown || softKeys.right,
   }
 }
 
@@ -272,8 +337,8 @@ var config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    Menu,
     EggSaver,
+    Menu,
   ],
   physics: {
     default: "arcade",

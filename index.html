@@ -19,7 +19,7 @@
       var errMessage = msg + '\nURL: ' + url + '\nLine Number: ' + linenumber;
       const errorElem = document.createElement('div');
       errorElem.style = 'color: rgb(255, 0, 0); position: fixed; background: #000; width: 100%; height: 2em; padding: 1em;';
-      errorElem.prepend(msg);
+      errorElem.prepend(errMessage);
       document.body.prepend(errorElem);
       // `return false` makes sure we report on dev console too
       return false;
