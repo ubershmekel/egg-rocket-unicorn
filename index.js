@@ -45,7 +45,9 @@ class EggSaver extends Phaser.Scene {
     // debug text
     this.debugText = this.add.text(0, 0, 'Hello World', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
     
-    // this.sky = this.add.Rectangle(0, 0, this.world.width, )
+    // this.sky = this.add.Rectangle(0, 0, this.game.scale.width, this.game.scale.height);
+    // this.sky.setFillStyle(0x0000ff);
+    this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
 
     // thrust image
     this.thrust1 = this.add.sprite(200, 200, 'thrust');
@@ -164,9 +166,16 @@ class EggSaver extends Phaser.Scene {
 
   handleKeys() {
     const cursorKeys = this.input.keyboard.createCursorKeys();
+    const codes = Phaser.Input.Keyboard.KeyCodes;
+    const wasd = this.input.keyboard.addKeys({
+      up: codes.W,
+      down: codes.S,
+      left: codes.A,
+      right: codes.D,
+    });
     const thrust = 700;
     const angleRate = 1.8;
-    if (cursorKeys.up.isDown) {
+    if (cursorKeys.up.isDown || wasd.up.isDown) {
       // Thrust!
       this.thrust1.visible = true;
       this.thrust1.x = this.ball.body.x;
@@ -183,10 +192,10 @@ class EggSaver extends Phaser.Scene {
     }
     
     // Rotate the egg
-    if (cursorKeys.left.isDown) {
+    if (cursorKeys.left.isDown || wasd.left.isDown) {
       this.ball.body.rotation -= angleRate;
     }
-    if (cursorKeys.right.isDown) {
+    if (cursorKeys.right.isDown || wasd.right.isDown) {
       this.ball.body.rotation += angleRate;
     }
 
