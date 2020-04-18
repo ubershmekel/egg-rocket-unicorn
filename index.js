@@ -1,5 +1,20 @@
 /* globals Phaser */
 
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function soundLoader(scene, soundUrls, volume=1.0) {
+  for (const url of soundUrls) {
+    const key = url;
+    scene.load.audio(key, url);
+  }
+  function playRandom() {
+    scene.sound.play(randomItem(soundUrls), { volume });
+  }
+  return playRandom;
+}
+
 class EggSaver extends Phaser.Scene {
 
   constructor (config) {
@@ -13,6 +28,8 @@ class EggSaver extends Phaser.Scene {
   preload() {
     this.load.svg('lander', 'images/combined-lander.svg');
     this.load.svg('thrust', 'images/thrust.svg');
+
+    this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.2);
 
     this.load.atlas(
       "assets",
@@ -106,6 +123,7 @@ class EggSaver extends Phaser.Scene {
 
   hitBrick(ball, brick) {
     brick.disableBody(true, true);
+    this.playChomp();
 
     if (this.bricks.countActive() === 0) {
       this.resetLevel();
