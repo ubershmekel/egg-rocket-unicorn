@@ -142,6 +142,14 @@ var Breakout = new Phaser.Class({
     } else {
       this.ball.body.acceleration.y = 0;
     }
+    
+    if (cursorKeys.left.isDown) {
+      this.ball.body.rotation += -1;
+    }
+
+    if (cursorKeys.right.isDown) {
+      this.ball.body.rotation += 1;
+    }
 
 
     if (this.ball.y > 600) {
