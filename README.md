@@ -53,5 +53,9 @@ Maybe a grid, you're a unicorn with a number goal
 9 8 5 3 2
 7 3 5 u 2
 
-Follow
+Follow a math path, but it might be too deterministic
+
+How about a bird in an egg, that is a lunar lander that you need to land safely and keep alive.
+
+
 
