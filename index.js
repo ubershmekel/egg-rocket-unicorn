@@ -102,8 +102,8 @@ class EggSaver extends Phaser.Scene {
     // const radius = 230;
     // this.ball.setInteractive(new Phaser.Geom.Circle(0, 0, radius), Phaser.Geom.Circle.Contains);
     this.ball.body.setSize(40, 70);
-    this.ball.body.offset.x = -25;
-    this.ball.body.offset.y = -25;
+    this.ball.body.offset.x = -20;
+    this.ball.body.offset.y = -30;
 
     // this.ball = this.physics.add.image(400, 400, "lander")
     this.ball.body.setCollideWorldBounds(true)
