@@ -13,6 +13,7 @@ var Breakout = new Phaser.Class({
 
   preload: function() {
     this.load.svg('lander', 'images/combined-lander.svg');
+    this.load.svg('thrust', 'images/thrust.svg');
 
     this.load.atlas(
       "assets",
@@ -48,7 +49,7 @@ var Breakout = new Phaser.Class({
       .image(400, 500, "lander")
       .setCollideWorldBounds(true)
       .setBounce(0.5);
-    this.ball.setGravityY(300);
+    this.ball.setGravityY(200);
     this.ball.setData("onPaddle", true);
 
     /*this.paddle = this.physics.add
@@ -141,23 +142,24 @@ var Breakout = new Phaser.Class({
     //console.log(this.ball.body.velocity.x);
     const cursorKeys = this.input.keyboard.createCursorKeys();
     const thrust = 700;
+    const angleRate = 1.5;
     this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
     if (cursorKeys.up.isDown) {
       // this.ball.body.applyForce({x: 0, y:100});
-      const rads = this.ball.body.rotation * 180 / Math.PI;
+      const rads = this.ball.body.rotation * Math.PI / 180;
       this.ball.body.acceleration.y = (-thrust) * Math.cos(rads);
-      this.ball.body.acceleration.x = (-thrust) * Math.sin(rads);
+      this.ball.body.acceleration.x = (thrust) * Math.sin(rads);
     } else {
       this.ball.body.acceleration.y = 0;
       this.ball.body.acceleration.x = 0;
     }
     
     if (cursorKeys.left.isDown) {
-      this.ball.body.rotation += -1;
+      this.ball.body.rotation -= angleRate;
     }
 
     if (cursorKeys.right.isDown) {
-      this.ball.body.rotation += 1;
+      this.ball.body.rotation += angleRate;
     }
 
 
