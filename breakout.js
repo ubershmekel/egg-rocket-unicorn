@@ -44,6 +44,7 @@ var Breakout = new Phaser.Class({
       .image(400, 500, "lander")
       .setCollideWorldBounds(true)
       .setBounce(1);
+    this.ball.setGravityY(100);
     this.ball.setData("onPaddle", true);
 
     this.paddle = this.physics.add
@@ -133,6 +134,7 @@ var Breakout = new Phaser.Class({
   },
 
   update: function() {
+    console.log(this.ball.velocity.x);
     if (this.ball.y > 600) {
       this.resetBall();
     }
