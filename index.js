@@ -27,6 +27,7 @@ class EggSaver extends Phaser.Scene {
 
   preload() {
     this.load.svg('lander', 'images/combined-lander.svg');
+    // this.load.image('lander', 'images/combined-lander.png');
     this.load.svg('thrust', 'images/thrust.svg');
 
     this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.2);
@@ -72,6 +73,8 @@ class EggSaver extends Phaser.Scene {
       .image(400, 400, "lander")
       .setCollideWorldBounds(true)
       .setBounce(0.5);
+    // this.ball.setScale(0.1, 0.1);
+    // this.ball.setScale(4, 4);
     this.ball.setGravityY(200);
     this.ball.setDrag(10, 10);
     this.ball.setData("onPaddle", true);
@@ -216,7 +219,7 @@ class EggSaver extends Phaser.Scene {
 }
 
 var config = {
-  type: Phaser.WEBGL,
+  // type: Phaser.WEBGL,
   width: 800,
   height: 600,
   parent: "phaser-container",
