@@ -1,15 +1,14 @@
 /* globals Phaser */
 
-var Breakout = new Phaser.Class({
-  Extends: Phaser.Scene,
+class EggSaver extends Phaser.Scene {
 
-  initialize() {
-    Phaser.Scene.call(this, { key: "breakout" });
+  constructor (config) {
+    super(config);
 
     this.bricks;
     this.paddle;
     this.ball;
-  },
+  }
 
   preload() {
     this.load.svg('lander', 'images/combined-lander.svg');
@@ -20,7 +19,7 @@ var Breakout = new Phaser.Class({
       "assets/games/breakout/breakout.png",
       "assets/games/breakout/breakout.json"
     );
-  },
+  }
 
   create() {
     //  Enable world bounds, but disable the floor
@@ -29,6 +28,8 @@ var Breakout = new Phaser.Class({
     // debug text
     this.debugText = this.add.text(0, 0, 'Hello World', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
     
+    // this.sky = this.add.Rectangle(0, 0, this.world.width, )
+
     // thrust image
     this.thrust1 = this.add.sprite(200, 200, 'thrust');
     this.thrust1.visible = false;
@@ -101,7 +102,7 @@ var Breakout = new Phaser.Class({
     //   },
     //   this
     // );
-  },
+  }
 
   hitBrick(ball, brick) {
     brick.disableBody(true, true);
@@ -109,13 +110,13 @@ var Breakout = new Phaser.Class({
     if (this.bricks.countActive() === 0) {
       this.resetLevel();
     }
-  },
+  }
 
   resetBall() {
     // this.ball.setVelocity(0);
     // this.ball.setPosition(this.paddle.x, 500);
     this.ball.setData("onPaddle", true);
-  },
+  }
 
   resetLevel() {
     this.resetBall();
@@ -123,7 +124,7 @@ var Breakout = new Phaser.Class({
     this.bricks.children.each(function(brick) {
       brick.enableBody(false, 0, 0, true, true);
     });
-  },
+  }
 
   hitPaddle(ball, paddle) {
     var diff = 0;
@@ -141,7 +142,7 @@ var Breakout = new Phaser.Class({
 //       //  Add a little random X to stop it bouncing straight up!
 //       ball.setVelocityX(2 + Math.random() * 8);
 //     }
-  },
+  }
 
   handleKeys() {
     const cursorKeys = this.input.keyboard.createCursorKeys();
@@ -171,7 +172,7 @@ var Breakout = new Phaser.Class({
       this.ball.body.rotation += angleRate;
     }
 
-  },
+  }
   
   update() {
     //console.log(this.ball.body.velocity.x);
@@ -184,18 +185,22 @@ var Breakout = new Phaser.Class({
     if (this.ball.y > 600) {
       this.resetBall();
     }
-  },
-});
+  }
+}
 
 var config = {
   type: Phaser.WEBGL,
   width: 800,
   height: 600,
   parent: "phaser-container",
-  scene: [Breakout],
+  scene: [EggSaver],
   physics: {
     default: "arcade"
-  }
+  },
+  scale: {
+    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+  },
 };
 
 var game = new Phaser.Game(config);
