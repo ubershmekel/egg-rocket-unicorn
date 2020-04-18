@@ -28,7 +28,10 @@ var Breakout = new Phaser.Class({
 
     // debug text
     this.debugText = this.add.text(0, 0, 'Hello World', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
-
+    
+    // thrust image
+    this.thrust1 = this.add.sprite(200, 200, 'thrust');
+    this.thrust1.visible = false;
     
     //  Create the bricks in a 10x6 grid
     this.bricks = this.physics.add.staticGroup({
@@ -50,6 +53,7 @@ var Breakout = new Phaser.Class({
       .setCollideWorldBounds(true)
       .setBounce(0.5);
     this.ball.setGravityY(200);
+    this.ball.setDrag(10, 10);
     this.ball.setData("onPaddle", true);
 
     /*this.paddle = this.physics.add
@@ -90,7 +94,7 @@ var Breakout = new Phaser.Class({
       "pointerup",
       function(pointer) {
         if (this.ball.getData("onPaddle")) {
-          this.ball.setVelocity(-75, -300);
+          // this.ball.setVelocity(-75, -300);
           this.ball.setData("onPaddle", false);
         }
       },
@@ -107,7 +111,7 @@ var Breakout = new Phaser.Class({
   },
 
   resetBall: function() {
-    this.ball.setVelocity(0);
+    // this.ball.setVelocity(0);
     // this.ball.setPosition(this.paddle.x, 500);
     this.ball.setData("onPaddle", true);
   },
@@ -142,14 +146,20 @@ var Breakout = new Phaser.Class({
     //console.log(this.ball.body.velocity.x);
     const cursorKeys = this.input.keyboard.createCursorKeys();
     const thrust = 700;
-    const angleRate = 1.5;
+    const angleRate = 1.8;
+    
     this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
     if (cursorKeys.up.isDown) {
+      // Thrust!
+      this.thrust1.visible = true;
+      this.thrust1.x = this.ball.body.x;
+      this.thrust1
       // this.ball.body.applyForce({x: 0, y:100});
       const rads = this.ball.body.rotation * Math.PI / 180;
       this.ball.body.acceleration.y = (-thrust) * Math.cos(rads);
       this.ball.body.acceleration.x = (thrust) * Math.sin(rads);
     } else {
+      this.thrust1.visible = false;
       this.ball.body.acceleration.y = 0;
       this.ball.body.acceleration.x = 0;
     }
