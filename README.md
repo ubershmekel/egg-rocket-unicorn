@@ -31,6 +31,7 @@ A business, a character, a human, a niche competitive scene, a band, words, a co
 The word "it" is something we want to keep alive.
 
 - Maybe your phone is running out of battery and you have to keep finding charge spots?
-
 - Protect a torch from the wind
-
+- A marriage, you try to keep it working, but you're making a game during your wife's birthday.
+- Draw a heart monitor pulse to keep the patient alive.
+- 
