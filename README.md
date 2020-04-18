@@ -12,9 +12,13 @@ I would like to constrain myself:
 * Simplest code and engine possible, to make it easy to learn from.
 * My kids, aged 7 and under, can play
 * Preferably with characters they like: rocket, robot, unicorn, puppy
-* Health and Corona virus are going to be cliche themes I'd rather avoid
+* Health and coronavirus are going to be cliche themes I'd rather avoid
 * Would be nice if they would learn some math or reading while playing.
+* Tablet play friendly
 
+So better ideas would be:
 
+* Move center, left or right, avoiding falling numbers. E.g. you are "17", you must dodge "9+9" and catch "9+8".
+* I love clicker economy games, maybe you're 
 
 
