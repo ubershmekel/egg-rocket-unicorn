@@ -1,5 +1,8 @@
 /* globals Phaser */
 
+// const debug = true;
+const debug = false;
+
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -13,6 +16,12 @@ function soundLoader(scene, soundUrls, volume=1.0) {
     scene.sound.play(randomItem(soundUrls), { volume });
   }
   return playRandom;
+}
+
+class Menu extends Phaser.Scene {
+  constructor (config) {
+    super(config);
+  }
 }
 
 class EggSaver extends Phaser.Scene {
@@ -32,11 +41,6 @@ class EggSaver extends Phaser.Scene {
 
     this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.2);
 
-    this.load.atlas(
-      "assets",
-      "assets/games/breakout/breakout.png",
-      "assets/games/breakout/breakout.json"
-    );
   }
 
   create() {
@@ -44,16 +48,13 @@ class EggSaver extends Phaser.Scene {
     this.physics.world.setBoundsCollision(true, true, true, true);
 
     // debug text
-    this.debugText = this.add.text(0, 0, 'Hello World', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
+    this.debugText = this.add.text(0, 0, 'Debug text', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
+    this.debugText.visible = debug;
     
     // this.sky = this.add.Rectangle(0, 0, this.game.scale.width, this.game.scale.height);
     // this.sky.setFillStyle(0x0000ff);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
 
-    // thrust image
-    this.thrust1 = this.add.sprite(200, 200, 'thrust');
-    this.thrust1.visible = false;
-    
     //  Create the bricks in a 10x6 grid
     this.bricks = this.physics.add.staticGroup({
       key: "assets",
@@ -69,15 +70,35 @@ class EggSaver extends Phaser.Scene {
       }
     });
 
-    this.ball = this.physics.add
-      .image(400, 400, "lander")
-      .setCollideWorldBounds(true)
-      .setBounce(0.5);
+    // Lander character
+    
+    // Thrust image
+    this.thrust1 = this.add.sprite(0, 40, 'thrust');
+    this.thrust1.visible = false;
+
+    // Lander base
+    const landerBase = this.add.image(0, 0, 'lander');
+    // const thrust = this.add.image(0, 45, 'thrust');
+    this.ball = this.add.container(300, 400, [this.thrust1, landerBase]);
+    this.physics.world.enable(this.ball);
+
+    // const radius = 230;
+    // this.ball.setInteractive(new Phaser.Geom.Circle(0, 0, radius), Phaser.Geom.Circle.Contains);
+    this.ball.body.setSize(40, 70);
+    this.ball.body.offset.x = -25;
+    this.ball.body.offset.y = -25;
+
+    // this.ball = this.physics.add.image(400, 400, "lander")
+    this.ball.body.setCollideWorldBounds(true)
+    this.ball.body.setBounce(0.5);
+    // this.ball.body.setOrigin(0.5, 0.5);
     // this.ball.setScale(0.1, 0.1);
     // this.ball.setScale(4, 4);
-    this.ball.setGravityY(200);
-    this.ball.setDrag(10, 10);
+    this.ball.body.setGravityY(200);
+    this.ball.body.setDrag(10, 10);
     this.ball.setData("onPaddle", true);
+
+    
 
     /*this.paddle = this.physics.add
       .image(400, 550, "assets", "paddle1")
@@ -181,8 +202,8 @@ class EggSaver extends Phaser.Scene {
     if (cursorKeys.up.isDown || wasd.up.isDown) {
       // Thrust!
       this.thrust1.visible = true;
-      this.thrust1.x = this.ball.body.x;
-      this.thrust1.y = this.ball.body.y;
+      // this.thrust1.x = this.ball.body.x;
+      // this.thrust1.y = this.ball.body.y;
       
       // Apply thrust based on current rotation of egg
       const rads = this.ball.body.rotation * Math.PI / 180;
@@ -225,7 +246,10 @@ var config = {
   parent: "phaser-container",
   scene: [EggSaver],
   physics: {
-    default: "arcade"
+    default: "arcade",
+    arcade: {
+      debug,
+    }
   },
   scale: {
     mode: Phaser.Scale.FIT,
