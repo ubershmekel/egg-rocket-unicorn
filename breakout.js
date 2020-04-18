@@ -25,6 +25,10 @@ var Breakout = new Phaser.Class({
     //  Enable world bounds, but disable the floor
     this.physics.world.setBoundsCollision(true, true, true, false);
 
+    // debug text
+    this.debugText = this.add.text(0, 0, 'Hello World', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
+
+    
     //  Create the bricks in a 10x6 grid
     this.bricks = this.physics.add.staticGroup({
       key: "assets",
@@ -136,11 +140,15 @@ var Breakout = new Phaser.Class({
   update: function() {
     //console.log(this.ball.body.velocity.x);
     const cursorKeys = this.input.keyboard.createCursorKeys();
+    const thrust = 700;
+    this.debugText.setText("angle " + this.ball.body.rotation)
     if (cursorKeys.up.isDown) {
       // this.ball.body.applyForce({x: 0, y:100});
-      this.ball.body.acceleration.y = -700;
+      this.ball.body.acceleration.y = thrust * Math.cos(this.ball.body.rotation);
+      this.ball.body.acceleration.x = -thrust * Math.sin(this.ball.body.rotation);
     } else {
       this.ball.body.acceleration.y = 0;
+      this.ball.body.acceleration.x = 0;
     }
     
     if (cursorKeys.left.isDown) {
