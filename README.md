@@ -55,7 +55,10 @@ Maybe a grid, you're a unicorn with a number goal
 
 Follow a math path, but it might be too deterministic
 
-How about a bird in an egg, that is a lunar lander that you need to land safely and keep alive.
+- How about a bird in an egg, that is a lunar lander that you need to land safely and keep alive.
+  Second level go to the fire to keep it warm
+  3rd - head on top is hungry for food, fly to get a worm
+  4th - 
 
 
 
