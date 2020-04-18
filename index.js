@@ -19,15 +19,32 @@ function soundLoader(scene, soundUrls, volume=1.0) {
 }
 
 class Menu extends Phaser.Scene {
-  constructor (config) {
-    super(config);
+  constructor () {
+    super({
+      key: "menu",
+    });
+  }
+
+  create() {
+    this.debugText = this.add.text(10, 10, 'Egg Rocket', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
+    this.add.text(10, 200, 'Use WASD or arrow keys', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
+    this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
+  }
+
+  update() {
+    const activeKeys = getActiveKeys(this.input.keyboard);
+    if (activeKeys.up || activeKeys.left || activeKeys.right) {
+      this.scene.start('game');
+    }
   }
 }
 
 class EggSaver extends Phaser.Scene {
 
   constructor (config) {
-    super(config);
+    super({
+      key: "game",
+    });
 
     this.bricks;
     this.paddle;
@@ -189,17 +206,11 @@ class EggSaver extends Phaser.Scene {
   }
 
   handleKeys() {
-    const cursorKeys = this.input.keyboard.createCursorKeys();
-    const codes = Phaser.Input.Keyboard.KeyCodes;
-    const wasd = this.input.keyboard.addKeys({
-      up: codes.W,
-      down: codes.S,
-      left: codes.A,
-      right: codes.D,
-    });
     const thrust = 700;
     const angleRate = 1.8;
-    if (cursorKeys.up.isDown || wasd.up.isDown) {
+
+    const keys = getActiveKeys(this.input.keyboard);
+    if (keys.up) {
       // Thrust!
       this.thrust1.visible = true;
       // this.thrust1.x = this.ball.body.x;
@@ -216,13 +227,12 @@ class EggSaver extends Phaser.Scene {
     }
     
     // Rotate the egg
-    if (cursorKeys.left.isDown || wasd.left.isDown) {
+    if (keys.left) {
       this.ball.body.rotation -= angleRate;
     }
-    if (cursorKeys.right.isDown || wasd.right.isDown) {
+    if (keys.right) {
       this.ball.body.rotation += angleRate;
     }
-
   }
   
   update() {
@@ -239,12 +249,32 @@ class EggSaver extends Phaser.Scene {
   }
 }
 
+function getActiveKeys(keyboard) {
+  const codes = Phaser.Input.Keyboard.KeyCodes;
+  const cursorKeys = keyboard.createCursorKeys();
+  const wasd = keyboard.addKeys({
+    up: codes.W,
+    down: codes.S,
+    left: codes.A,
+    right: codes.D,
+  });
+
+  return {
+    up: cursorKeys.up.isDown || wasd.up.isDown,
+    left: cursorKeys.left.isDown || wasd.left.isDown,
+    right: cursorKeys.right.isDown || wasd.right.isDown,
+  }
+}
+
 var config = {
   // type: Phaser.WEBGL,
   width: 800,
   height: 600,
   parent: "phaser-container",
-  scene: [EggSaver],
+  scene: [
+    Menu,
+    EggSaver,
+  ],
   physics: {
     default: "arcade",
     arcade: {
