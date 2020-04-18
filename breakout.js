@@ -44,7 +44,7 @@ var Breakout = new Phaser.Class({
       .image(400, 500, "lander")
       .setCollideWorldBounds(true)
       .setBounce(1);
-    this.ball.setGravityY(100);
+    this.ball.setGravityY(300);
     this.ball.setData("onPaddle", true);
 
     this.paddle = this.physics.add
@@ -134,7 +134,16 @@ var Breakout = new Phaser.Class({
   },
 
   update: function() {
-    console.log(this.ball.velocity.x);
+    //console.log(this.ball.body.velocity.x);
+    const cursorKeys = this.input.keyboard.createCursorKeys();
+    if (cursorKeys.up.isDown) {
+      // this.ball.body.applyForce({x: 0, y:100});
+      this.ball.body.acceleration.y = -700;
+    } else {
+      this.ball.body.acceleration.y = 0;
+    }
+
+
     if (this.ball.y > 600) {
       this.resetBall();
     }
