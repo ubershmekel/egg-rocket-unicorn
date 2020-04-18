@@ -4,7 +4,7 @@
 const debug = false;
 
 class Button extends Phaser.GameObjects.Rectangle {
-  constructor({scene, x, y, width, height, text, bgColor, textColor, onClick, onRest}) {
+  constructor({scene, x, y, width, height, text, bgColor, textColor, onDown, onUp}) {
     super(scene, x, y);
 
     const padding = 10;
@@ -29,12 +29,12 @@ class Button extends Phaser.GameObjects.Rectangle {
       .on('pointerdown', this.enterMenuButtonActiveState)
       .on('pointerup', this.enterMenuButtonHoverState);
 
-      if (onClick) {
-        this.on('pointerdown', onClick);
+      if (onDown) {
+        this.on('pointerdown', onDown);
       }
-      if (onRest) {
-        this.on('pointerup', onRest);
-        this.on('pointerout', onRest)
+      if (onUp) {
+        this.on('pointerup', onUp);
+        this.on('pointerout', onUp)
       }
     
     this.enterMenuButtonRestState();
@@ -107,6 +107,7 @@ class EggSaver extends Phaser.Scene {
     this.load.svg('lander', 'images/combined-lander.svg');
     // this.load.image('lander', 'images/combined-lander.png');
     this.load.svg('thrust', 'images/thrust.svg');
+    this.load.svg('rainbow', 'images/rainbow.svg');
 
     this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.2);
 
@@ -116,14 +117,40 @@ class EggSaver extends Phaser.Scene {
     this.leftButton = new Button({
       scene: this,
       x: 0,
-      y: 0,
-      width: 100,
+      y: this.game.scale.height - 100,
+      width: 50,
       height: 100,
-      text: "left",
+      text: "⬅a",
       bgColor: 0xff0000,
       textColor: 0xffffff,
-      onClick: () => softKeys.left = true,
-      onRest: () => softKeys.left = false,
+      onDown: () => softKeys.left = true,
+      onUp: () => softKeys.left = false,
+    })
+
+    this.rightButton = new Button({
+      scene: this,
+      x: 60,
+      y: this.game.scale.height - 100,
+      width: 50,
+      height: 100,
+      text: "d➡",
+      bgColor: 0xff0000,
+      textColor: 0xffffff,
+      onDown: () => softKeys.right = true,
+      onUp: () => softKeys.right = false,
+    })
+
+    this.upButton = new Button({
+      scene: this,
+      x: this.game.scale.width - 50,
+      y: this.game.scale.height - 100,
+      width: 50,
+      height: 100,
+      text: "w⬆",
+      bgColor: 0xff0000,
+      textColor: 0xffffff,
+      onDown: () => softKeys.up = true,
+      onUp: () => softKeys.up = false,
     })
 
     //  Enable world bounds, but disable the floor
@@ -139,8 +166,8 @@ class EggSaver extends Phaser.Scene {
 
     //  Create the bricks in a 10x6 grid
     this.bricks = this.physics.add.staticGroup({
-      key: "assets",
-      frame: ["blue1", "red1", "green1", "yellow1", "silver1", "purple1"],
+      // key: "rainbow",
+      frame: ["rainbow", "red1", "green1", "yellow1", "silver1", "purple1"],
       frameQuantity: 10,
       gridAlign: {
         width: 10,
@@ -325,7 +352,7 @@ function getActiveKeys(keyboard) {
   });
 
   return {
-    up: cursorKeys.up.isDown || wasd.up.isDown || softKeys.down,
+    up: cursorKeys.up.isDown || wasd.up.isDown || softKeys.up,
     left: cursorKeys.left.isDown || wasd.left.isDown || softKeys.left,
     right: cursorKeys.right.isDown || wasd.right.isDown || softKeys.right,
   }
