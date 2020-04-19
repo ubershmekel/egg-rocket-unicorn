@@ -3,6 +3,9 @@
 let debug = false;
 // debug = true;
 
+const musicUrl = "audio/music-sad-loop-reverb.mp3";
+let musicStarted = false;
+
 const defaultFontStyle = {
   fontFamily: 'Verdana, "Times New Roman", Tahoma, serif',
   fontSize: '20px',
@@ -23,8 +26,6 @@ class MenuScene extends Phaser.Scene {
     super({
       key: "menu",
     });
-
-    this.phase = 'waiting';
   }
 
   preload() {
@@ -38,6 +39,10 @@ class MenuScene extends Phaser.Scene {
   }
 
   create() {
+    this.phase = 'waiting';
+    
+    playMusic(this);
+
     this.titleText = this.add.text(10, 300, 'Egg Rocket Unicorn', defaultFontStyle);
     this.instructionsText = this.add.text(10, 500, 'Use WASD or arrow keys', defaultFontStyle);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
@@ -230,7 +235,7 @@ class MenuScene extends Phaser.Scene {
 ///////////////////////////////////////////////
 // Scene
 ///////////////////////////////////////////////
-class EggSaverScene extends Phaser.Scene {
+class EatRainbowsScene extends Phaser.Scene {
 
   constructor(config) {
     super({
@@ -246,9 +251,12 @@ class EggSaverScene extends Phaser.Scene {
 
     this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.2);
 
+    this.load.audio(musicUrl, musicUrl);
   }
 
   create() {
+    playMusic(this);
+
     this.createTouchButtons();
 
     // debug text
@@ -336,6 +344,8 @@ class EggSaverScene extends Phaser.Scene {
   hitBrick(ball, brick) {
     brick.disableBody(true, true);
     this.playChomp();
+    
+    this.scene.start('menu');
 
     if (this.bricks.countActive() === 0) {
       this.resetLevel();
@@ -451,6 +461,18 @@ class Button extends Phaser.GameObjects.Rectangle {
 // Functions
 ///////////////////////////////////////////////
 
+function playMusic(scene) {
+  if (musicStarted) {
+    console.log("music already playing");
+  } else {
+    musicStarted = true;
+    scene.sound.play(musicUrl, {
+      volume: 0.3,
+      loop: true,
+    });
+  }
+}
+
 function createLanderPhysics(scene, landerImageName) {
   scene.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -545,14 +567,15 @@ function soundLoader(scene, soundUrls, volume = 1.0) {
   }
   return playRandom;
 }
+
 var config = {
   // type: Phaser.WEBGL,
   width: 800,
   height: 600,
   parent: "phaser-container",
   scene: [
-    // MenuScene,
-    EggSaverScene,
+    EatRainbowsScene,
+    MenuScene,
   ],
   physics: {
     default: "arcade",
