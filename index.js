@@ -665,7 +665,7 @@ function globalPreload(scene) {
 }
 
 function globalCreate(scene) {
-  // playMusic(scene);
+  playMusic(scene);
 
   if (isTouchScreen()) {
     createTouchButtons(scene);
