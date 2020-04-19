@@ -3,78 +3,6 @@
 // const debug = true;
 const debug = false;
 
-class Button extends Phaser.GameObjects.Rectangle {
-  constructor({scene, x, y, width, height, text, bgColor, textColor, onDown, onUp}) {
-    super(scene, x, y);
-
-    const padding = 10;
-
-    scene.add.existing(this);
-    this.setOrigin(0, 0);
-
-    const style = { align: "center", fontSize: '30px'};
-    this.label = scene.add.text(x + padding, y + padding, text, style)
-
-    // const labelWidth = this.label.width + padding;
-    // const labelHeight = this.label.height + padding;
-    // this.width = labelWidth >= minimumWidth ? labelWidth : minimumWidth;
-    // this.height = labelHeight >= minimumHeight ? labelHeight : minimumHeight;
-    this.width = width;
-    this.height = height;
-    this.bgColor = bgColor;
-    this.textColor = textColor;
-    this.text = text;
-
-    this.setInteractive({ useHandCursor: true })
-      // .on('pointerover', this.enterMenuButtonHoverState)
-      .on('pointerout', this.enterMenuButtonRestState)
-      .on('pointerdown', this.enterMenuButtonActiveState)
-      .on('pointerup', this.enterMenuButtonHoverState);
-
-      if (onDown) {
-        this.on('pointerdown', onDown);
-      }
-      if (onUp) {
-        this.on('pointerup', onUp);
-        this.on('pointerout', onUp)
-      }
-    
-    this.enterMenuButtonRestState();
-    this.label.setColor(0x00ff00);
-    this.setAlpha(0.5);
-  }
-
-  enterMenuButtonHoverState() {
-    this.setFillStyle(0x888888);
-  }
-
-  enterMenuButtonRestState() {
-    // this.label.setColor('#FFFFFF');
-    this.setFillStyle(0xffffff);
-  }
-
-  enterMenuButtonActiveState() {
-    // this.label.setColor('#BBBBBB');
-    this.setFillStyle(0x444444);
-  }
-}
-
-
-function randomItem(items) {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-function soundLoader(scene, soundUrls, volume=1.0) {
-  for (const url of soundUrls) {
-    const key = url;
-    scene.load.audio(key, url);
-  }
-  function playRandom() {
-    scene.sound.play(randomItem(soundUrls), { volume });
-  }
-  return playRandom;
-}
-
 const defaultFontStyle = {
   fontFamily: 'Verdana, "Times New Roman", Tahoma, serif',
   fontSize: '20px',
@@ -85,48 +13,150 @@ const colors = {
   skyNight: Phaser.Display.Color.HexStringToColor("#369"),
 }
 
+const softKeys = {};
+
 ///////////////////////////////////////////////
 // Scene
 ///////////////////////////////////////////////
 class MenuScene extends Phaser.Scene {
-  constructor () {
+  constructor() {
     super({
       key: "menu",
     });
+
+    this.phase = 'waiting';
   }
 
   preload() {
     this.load.svg('tree', 'images/tree.svg');
+    this.load.svg('egg', 'images/egg.svg');
+    this.load.image('vertical-speed-particle', 'images/vertical-speed-particle.png');
   }
 
   create() {
-    this.debugText = this.add.text(10, 10, 'Eggggg', defaultFontStyle);
-    this.instructions = this.add.text(10, 400, 'Use WASD or arrow keys', defaultFontStyle);
+    this.titleText = this.add.text(10, 10, 'Egg Rocket Unicorn', defaultFontStyle);
+    this.instructionsText = this.add.text(10, 400, 'Use WASD or arrow keys', defaultFontStyle);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
-    this.add.image(500, 700, 'tree');
+    this.tree = this.add.image(500, 700, 'tree');
+    this.egg = this.add.image(450, 175, 'egg');
+    this.egg.setDepth(-1);
+
+
+
+    // tween.onComplete.add(this.startMatch, this);
+    // this.animTreeUp = this.tweens.add({
+    //   targetthis.tree).to( { x: 700, y: -600 }, 2000, "Quart.easeOut");
+    // tweenB = this.add.tween(this.egg).to( { x: 400, y: 400 }, 2000, "Quart.easeOut");
+    // this.animTreeUp.chain(tweenB);
+
+    // game.input.onDown.addOnce(start, this);
+
   }
 
   update() {
     const activeKeys = getActiveKeys(this.input.keyboard);
-    if (activeKeys.up || activeKeys.left || activeKeys.right) {
-      this.scene.start('game');
+    if (this.phase === 'waiting') {
+      if (activeKeys.up || activeKeys.left || activeKeys.right) {
+        // this.scene.start('game');
+        // this.animTreeUp.start()
+        console.log("Egg dropping :(");
+        this.phase = 'drop-egg';
+        this.dropEgg();
+      }
+
+      // this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
+      const skyPhase = (Math.cos(this.time.now * 0.001) + 1) * 5;
+      const hexColor = Phaser.Display.Color.Interpolate.ColorWithColor(colors.skyDay, colors.skyNight, 10, skyPhase);
+      // console.log(skyPhase, hexColor);
+      this.cameras.main.setBackgroundColor(hexColor);
     }
-    // this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
-    const skyPhase = (Math.cos(this.time.now * 0.001) + 1) * 5;
-    const hexColor = Phaser.Display.Color.Interpolate.ColorWithColor(colors.skyDay, colors.skyNight, 10, skyPhase);
-    // console.log(skyPhase, hexColor);
-    this.cameras.main.setBackgroundColor(hexColor);
+  }
+
+  animTreeAway() {
+    this.tweens.add({
+      targets: [this.titleText, this.instructionsText],
+      alpha: 0,
+    })
+    this.tweens.timeline({
+      targets: this.tree,
+      ease: 'Power1',
+      duration: 13000,
+
+      tweens: [
+        {
+          x: 600,
+          y: -0,
+          alpha: 0,
+        },
+      ]
+    });
+  }
+
+  windParticles() {
+    
+    // Falling wind effect
+    this.particles = this.add.particles('vertical-speed-particle');
+    this.emitter = this.particles.createEmitter({
+      // frame: 'vertical-speed-particle',
+      x: { min: 0, max: this.game.scale.width },
+      y: { min: 0, max: this.game.scale.height },
+      lifespan: 1000,
+      speedX: { min: -2, max: 2 },
+      speedY: { min: -240, max: -790 },
+      // speedY: { min: 0, max: 10 },
+      alpha: { start: 0, end: 1 },
+      scale: { start: 0.8, end: 0 },
+      frequency: 31,
+      blendMode: 'ADD'
+    });
+
+    // this.emitter.speedY = { min: -140, max: -590 };
+    // this.emitter.visible = false;
+
+    // put wind particles behind the tree
+    this.particles.setDepth(-100);
+    // this.emitter.on = false;
+  }
+
+  dropEgg() {
+    this.tweens.timeline({ tweens: [
+      {
+        targets: this.egg,
+        ease: 'Quad.easeIn',
+        duration: 3000,
+        rotation: -0.6,
+        onComplete: () => {
+          this.animTreeAway();
+          this.windParticles();
+        },
+      },
+      {
+        targets: this.egg,
+        ease: 'Power1',
+        duration: 10000,
+        rotation: -Math.PI * 2,
+        x: this.game.scale.width / 2,
+        y: this.game.scale.height / 4,
+      },
+      {
+        targets: this.egg,
+        ease: 'Linear',
+        duration: 9000,
+        rotation: -Math.PI * 2,
+        repeat: 1,
+      }
+    ]});
+
+
   }
 }
-
-const softKeys = {};
 
 ///////////////////////////////////////////////
 // Scene
 ///////////////////////////////////////////////
 class EggSaverScene extends Phaser.Scene {
 
-  constructor (config) {
+  constructor(config) {
     super({
       key: "game",
     });
@@ -151,7 +181,7 @@ class EggSaverScene extends Phaser.Scene {
     // debug text
     this.debugText = this.add.text(0, 0, 'Debug text', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
     this.debugText.visible = debug;
-    
+
     // this.sky = this.add.Rectangle(0, 0, this.game.scale.width, this.game.scale.height);
     // this.sky.setFillStyle(0x0000ff);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
@@ -172,7 +202,7 @@ class EggSaverScene extends Phaser.Scene {
     });
 
     // Lander character
-    
+
     // Thrust image
     this.thrust1 = this.add.sprite(0, 40, 'thrust');
     this.thrust1.visible = false;
@@ -199,7 +229,7 @@ class EggSaverScene extends Phaser.Scene {
     this.ball.body.setDrag(10, 10);
     this.ball.setData("onPaddle", true);
 
-    
+
 
     /*this.paddle = this.physics.add
       .image(400, 550, "assets", "paddle1")
@@ -225,13 +255,13 @@ class EggSaverScene extends Phaser.Scene {
     //  Input events
     this.input.on(
       "pointermove",
-      function(pointer) {
+      function (pointer) {
         //  Keep the paddle within the game
-//         this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
+        //         this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
 
-//         if (this.ball.getData("onPaddle")) {
-//           this.ball.x = this.paddle.x;
-//         }
+        //         if (this.ball.getData("onPaddle")) {
+        //           this.ball.x = this.paddle.x;
+        //         }
       },
       this
     );
@@ -308,7 +338,7 @@ class EggSaverScene extends Phaser.Scene {
   resetLevel() {
     this.resetBall();
 
-    this.bricks.children.each(function(brick) {
+    this.bricks.children.each(function (brick) {
       brick.enableBody(false, 0, 0, true, true);
     });
   }
@@ -316,19 +346,19 @@ class EggSaverScene extends Phaser.Scene {
   hitPaddle(ball, paddle) {
     var diff = 0;
 
-//     if (ball.x < paddle.x) {
-//       //  Ball is on the left-hand side of the paddle
-//       diff = paddle.x - ball.x;
-//       ball.setVelocityX(-10 * diff);
-//     } else if (ball.x > paddle.x) {
-//       //  Ball is on the right-hand side of the paddle
-//       diff = ball.x - paddle.x;
-//       ball.setVelocityX(10 * diff);
-//     } else {
-//       //  Ball is perfectly in the middle
-//       //  Add a little random X to stop it bouncing straight up!
-//       ball.setVelocityX(2 + Math.random() * 8);
-//     }
+    //     if (ball.x < paddle.x) {
+    //       //  Ball is on the left-hand side of the paddle
+    //       diff = paddle.x - ball.x;
+    //       ball.setVelocityX(-10 * diff);
+    //     } else if (ball.x > paddle.x) {
+    //       //  Ball is on the right-hand side of the paddle
+    //       diff = ball.x - paddle.x;
+    //       ball.setVelocityX(10 * diff);
+    //     } else {
+    //       //  Ball is perfectly in the middle
+    //       //  Add a little random X to stop it bouncing straight up!
+    //       ball.setVelocityX(2 + Math.random() * 8);
+    //     }
   }
 
   handleKeys() {
@@ -341,7 +371,7 @@ class EggSaverScene extends Phaser.Scene {
       this.thrust1.visible = true;
       // this.thrust1.x = this.ball.body.x;
       // this.thrust1.y = this.ball.body.y;
-      
+
       // Apply thrust based on current rotation of egg
       const rads = this.ball.body.rotation * Math.PI / 180;
       this.ball.body.acceleration.y = (-thrust) * Math.cos(rads);
@@ -351,7 +381,7 @@ class EggSaverScene extends Phaser.Scene {
       this.ball.body.acceleration.y = 0;
       this.ball.body.acceleration.x = 0;
     }
-    
+
     // Rotate the egg
     if (keys.left) {
       this.ball.body.rotation -= angleRate;
@@ -360,10 +390,10 @@ class EggSaverScene extends Phaser.Scene {
       this.ball.body.rotation += angleRate;
     }
   }
-  
+
   update() {
     //console.log(this.ball.body.velocity.x);
-    
+
     this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
 
     this.handleKeys();
@@ -375,6 +405,69 @@ class EggSaverScene extends Phaser.Scene {
   }
 }
 
+
+///////////////////////////////////////////////
+// UI
+///////////////////////////////////////////////
+class Button extends Phaser.GameObjects.Rectangle {
+  constructor({ scene, x, y, width, height, text, bgColor, textColor, onDown, onUp }) {
+    super(scene, x, y);
+
+    const padding = 10;
+
+    scene.add.existing(this);
+    this.setOrigin(0, 0);
+
+    const style = { align: "center", fontSize: '30px' };
+    this.label = scene.add.text(x + padding, y + padding, text, style)
+
+    // const labelWidth = this.label.width + padding;
+    // const labelHeight = this.label.height + padding;
+    // this.width = labelWidth >= minimumWidth ? labelWidth : minimumWidth;
+    // this.height = labelHeight >= minimumHeight ? labelHeight : minimumHeight;
+    this.width = width;
+    this.height = height;
+    this.bgColor = bgColor;
+    this.textColor = textColor;
+    this.text = text;
+
+    this.setInteractive({ useHandCursor: true })
+      // .on('pointerover', this.enterMenuButtonHoverState)
+      .on('pointerout', this.enterMenuButtonRestState)
+      .on('pointerdown', this.enterMenuButtonActiveState)
+      .on('pointerup', this.enterMenuButtonHoverState);
+
+    if (onDown) {
+      this.on('pointerdown', onDown);
+    }
+    if (onUp) {
+      this.on('pointerup', onUp);
+      this.on('pointerout', onUp)
+    }
+
+    this.enterMenuButtonRestState();
+    this.label.setColor(0x00ff00);
+    this.setAlpha(0.5);
+  }
+
+  enterMenuButtonHoverState() {
+    this.setFillStyle(0x888888);
+  }
+
+  enterMenuButtonRestState() {
+    // this.label.setColor('#FFFFFF');
+    this.setFillStyle(0xffffff);
+  }
+
+  enterMenuButtonActiveState() {
+    // this.label.setColor('#BBBBBB');
+    this.setFillStyle(0x444444);
+  }
+}
+
+///////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////
 function getActiveKeys(keyboard) {
   const codes = Phaser.Input.Keyboard.KeyCodes;
   const cursorKeys = keyboard.createCursorKeys();
@@ -392,6 +485,20 @@ function getActiveKeys(keyboard) {
   }
 }
 
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function soundLoader(scene, soundUrls, volume = 1.0) {
+  for (const url of soundUrls) {
+    const key = url;
+    scene.load.audio(key, url);
+  }
+  function playRandom() {
+    scene.sound.play(randomItem(soundUrls), { volume });
+  }
+  return playRandom;
+}
 var config = {
   // type: Phaser.WEBGL,
   width: 800,
