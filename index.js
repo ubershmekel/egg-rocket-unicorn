@@ -234,16 +234,10 @@ class GetWarmScene extends Phaser.Scene {
   }
 
   preload() {
-    // this.load.svg('tree', 'images/tree.svg');
-    // this.load.svg('egg', 'images/egg.svg');
-    // this.load.svg('robot', 'images/robot.svg');
-    // this.load.svg('big-robot', 'images/big-robot.svg');
-    // this.load.image('vertical-speed-particle', 'images/vertical-speed-particle.png');
-
     this.load.svg('lander', 'images/combined-lander.svg');
     this.load.svg('thrust', 'images/thrust.svg');
     this.load.svg('tree-clump', 'images/tree-clump.svg');
-    this.load.image('snowflake', 'images/snowflake.png');
+    this.load.image('snowflake', 'images/snowflake.svg');
 
     globalPreload(this);
   }
@@ -399,7 +393,6 @@ class EatRainbowsScene extends Phaser.Scene {
   }
 
   preload() {
-    // this.load.image('lander', 'images/combined-lander.png');
     this.load.svg('robo-egg-unicorn', 'images/robo-egg-unicorn.svg');
     this.load.svg('thrust', 'images/thrust.svg');
     this.load.svg('rainbow', 'images/rainbow.svg');
@@ -425,7 +418,8 @@ class EatRainbowsScene extends Phaser.Scene {
     this.bricks = this.physics.add.staticGroup({
       key: "rainbow",
       // frame: ["rainbow", "red1", "green1", "yellow1", "silver1", "purple1"],
-      frameQuantity: 60,
+      frameQuantity: 6,
+      // frameQuantity: 60,
       gridAlign: {
         width: 10,
         height: 6,
@@ -524,14 +518,13 @@ class GoodbyeScene extends Phaser.Scene {
     globalPreload(this);
 
     this.load.svg('robot', 'images/robot.svg');
-    // this.load.image('robot-family', 'images/robot-family.png');
     this.load.image('robot-family', 'images/robot-family.svg');
     this.load.image('forest-left', 'images/forest-left.svg');
     this.load.image('forest-left-clump', 'images/forest-left-clump.svg');
     this.load.svg('robo-egg-unicorn', 'images/robo-egg-unicorn.svg');
     this.load.svg('scene-goodbye', 'images/scene-goodbye.svg');
     this.load.svg('thrust', 'images/thrust.svg');
-    this.load.spritesheet('unicorn', 'images/unicorn-walk-left.png', { frameWidth: 100, frameHeight: 100 });
+    this.load.spritesheet('unicorn', 'images/unicorn-walk-left.svg', { frameWidth: 100, frameHeight: 100 });
 
   }
 
@@ -728,6 +721,7 @@ class Button extends Phaser.GameObjects.Rectangle {
 ///////////////////////////////////////////////
 
 let isFadeActive = false;
+
 async function fadeOutToScene(scene, toSceneName) {
   if (isFadeActive) {
     console.log("Already fading out", toSceneName);
@@ -890,7 +884,7 @@ function createTouchButtons(scene) {
     textColor: 0xffffff,
     onDown: () => softKeys.left = true,
     onUp: () => softKeys.left = false,
-  })
+  });
 
   scene.rightButton = new Button({
     scene: scene,
@@ -903,7 +897,7 @@ function createTouchButtons(scene) {
     textColor: 0xffffff,
     onDown: () => softKeys.right = true,
     onUp: () => softKeys.right = false,
-  })
+  });
 
   scene.upButton = new Button({
     scene: scene,
@@ -916,7 +910,11 @@ function createTouchButtons(scene) {
     textColor: 0xffffff,
     onDown: () => softKeys.up = true,
     onUp: () => softKeys.up = false,
-  })
+  });
+
+  scene.upButton.setDepth(9999);
+  scene.leftButton.setDepth(9999);
+  scene.rightButton.setDepth(9999);
 }
 
 function randomItem(items) {
@@ -1000,12 +998,12 @@ const config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    MenuScene,
-    GoodbyeScene,
     GetWarmScene,
+    GoodbyeScene,
+    MenuScene,
+    EatRainbowsScene,
     FriendsForeverScene,
     NoMoreUnicornScene,
-    EatRainbowsScene,
   ],
   physics: {
     default: "arcade",

@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="26.783373mm"
-   height="28.014339mm"
-   viewBox="0 0 26.783373 28.014339"
+   width="101"
+   height="106"
+   viewBox="0 0 26.722918 28.045833"
    version="1.1"
    id="svg18870"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
@@ -29,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.6"
-     inkscape:cx="76.253819"
+     inkscape:cx="32.860962"
      inkscape:cy="61.020991"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -42,7 +42,8 @@
      inkscape:window-height="1027"
      inkscape:window-x="1912"
      inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     units="px" />
   <metadata
      id="metadata18867">
     <rdf:RDF>
@@ -59,7 +60,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-1.442764,-268.20451)">
+     transform="translate(-1.442764,-268.17302)">
     <path
        style="fill:none;stroke:#4f85ff;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 15.213542,269.21875 0.47247,25.98586"

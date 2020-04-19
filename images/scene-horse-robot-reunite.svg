@@ -16,7 +16,10 @@
    version="1.1"
    id="svg68892"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="scene-horse-robot-reunite.svg">
+   sodipodi:docname="scene-horse-robot-reunite.svg"
+   inkscape:export-filename="D:\1stuff\Dropbox\dev\game\egg-saver\u46\images\scene-horse-robot-reunite.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs68886">
     <linearGradient
@@ -401,8 +404,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="125.99138"
-     inkscape:cy="309.63683"
+     inkscape:cx="397.41995"
+     inkscape:cy="326.77969"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -670,16 +673,16 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'Roboto Medium';-inkscape-font-specification:'Roboto Medium, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="83.154762"
+       x="81.64286"
        y="155.25894"
        id="text92093"><tspan
          sodipodi:role="line"
          id="tspan92091"
-         x="83.154762"
+         x="81.64286"
          y="155.25894"
          style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10.58333302px;font-family:'Roboto Medium';-inkscape-font-specification:'Roboto Medium, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;stroke-width:0.26458332">Robot and unicorn stayed</tspan><tspan
          sodipodi:role="line"
-         x="83.154762"
+         x="81.64286"
          y="168.48811"
          style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10.58333302px;font-family:'Roboto Medium';-inkscape-font-specification:'Roboto Medium, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;stroke-width:0.26458332"
          id="tspan92095">friends ever after...</tspan></text>
