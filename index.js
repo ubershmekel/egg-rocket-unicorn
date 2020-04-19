@@ -12,7 +12,8 @@ class Button extends Phaser.GameObjects.Rectangle {
     scene.add.existing(this);
     this.setOrigin(0, 0);
 
-    this.label = scene.add.text(x + padding, y + padding, text).setFontSize(18).setAlign('center');
+    const style = { align: "center", fontSize: '30px'};
+    this.label = scene.add.text(x + padding, y + padding, text, style)
 
     // const labelWidth = this.label.width + padding;
     // const labelHeight = this.label.height + padding;
@@ -22,9 +23,10 @@ class Button extends Phaser.GameObjects.Rectangle {
     this.height = height;
     this.bgColor = bgColor;
     this.textColor = textColor;
+    this.text = text;
 
     this.setInteractive({ useHandCursor: true })
-      .on('pointerover', this.enterMenuButtonHoverState)
+      // .on('pointerover', this.enterMenuButtonHoverState)
       .on('pointerout', this.enterMenuButtonRestState)
       .on('pointerdown', this.enterMenuButtonActiveState)
       .on('pointerup', this.enterMenuButtonHoverState);
@@ -38,20 +40,21 @@ class Button extends Phaser.GameObjects.Rectangle {
       }
     
     this.enterMenuButtonRestState();
+    this.label.setColor(0x00ff00);
+    this.setAlpha(0.5);
   }
 
   enterMenuButtonHoverState() {
-    this.label.setColor('#000000');
     this.setFillStyle(0x888888);
   }
 
   enterMenuButtonRestState() {
-    this.label.setColor('#FFFFFF');
-    this.setFillStyle(0x008888);
+    // this.label.setColor('#FFFFFF');
+    this.setFillStyle(0xffffff);
   }
 
   enterMenuButtonActiveState() {
-    this.label.setColor('#BBBBBB');
+    // this.label.setColor('#BBBBBB');
     this.setFillStyle(0x444444);
   }
 }
@@ -114,44 +117,7 @@ class EggSaver extends Phaser.Scene {
   }
 
   create() {
-    this.leftButton = new Button({
-      scene: this,
-      x: 0,
-      y: this.game.scale.height - 100,
-      width: 50,
-      height: 100,
-      text: "⬅a",
-      bgColor: 0xff0000,
-      textColor: 0xffffff,
-      onDown: () => softKeys.left = true,
-      onUp: () => softKeys.left = false,
-    })
-
-    this.rightButton = new Button({
-      scene: this,
-      x: 60,
-      y: this.game.scale.height - 100,
-      width: 50,
-      height: 100,
-      text: "d➡",
-      bgColor: 0xff0000,
-      textColor: 0xffffff,
-      onDown: () => softKeys.right = true,
-      onUp: () => softKeys.right = false,
-    })
-
-    this.upButton = new Button({
-      scene: this,
-      x: this.game.scale.width - 50,
-      y: this.game.scale.height - 100,
-      width: 50,
-      height: 100,
-      text: "w⬆",
-      bgColor: 0xff0000,
-      textColor: 0xffffff,
-      onDown: () => softKeys.up = true,
-      onUp: () => softKeys.up = false,
-    })
+    this.createTouchButtons();
 
     //  Enable world bounds, but disable the floor
     this.physics.world.setBoundsCollision(true, true, true, true);
@@ -166,7 +132,7 @@ class EggSaver extends Phaser.Scene {
 
     //  Create the bricks in a 10x6 grid
     this.bricks = this.physics.add.staticGroup({
-      // key: "rainbow",
+      key: "bla",
       frame: ["rainbow", "red1", "green1", "yellow1", "silver1", "purple1"],
       frameQuantity: 10,
       gridAlign: {
@@ -254,6 +220,48 @@ class EggSaver extends Phaser.Scene {
     //   },
     //   this
     // );
+  }
+
+  createTouchButtons() {
+    const buttonWidth = 80;
+    this.leftButton = new Button({
+      scene: this,
+      x: 0,
+      y: this.game.scale.height - 100,
+      width: buttonWidth,
+      height: 100,
+      text: "⬅a",
+      bgColor: 0xff0000,
+      textColor: 0xffffff,
+      onDown: () => softKeys.left = true,
+      onUp: () => softKeys.left = false,
+    })
+
+    this.rightButton = new Button({
+      scene: this,
+      x: buttonWidth + 10,
+      y: this.game.scale.height - 100,
+      width: buttonWidth,
+      height: 100,
+      text: "d➡",
+      bgColor: 0xff0000,
+      textColor: 0xffffff,
+      onDown: () => softKeys.right = true,
+      onUp: () => softKeys.right = false,
+    })
+
+    this.upButton = new Button({
+      scene: this,
+      x: this.game.scale.width - buttonWidth,
+      y: this.game.scale.height - 100,
+      width: buttonWidth,
+      height: 100,
+      text: "w⬆",
+      bgColor: 0xff0000,
+      textColor: 0xffffff,
+      onDown: () => softKeys.up = true,
+      onUp: () => softKeys.up = false,
+    })
   }
 
   hitBrick(ball, brick) {
@@ -377,6 +385,10 @@ var config = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  input: {
+    // Allow hitting more than one soft button at a time
+    activePointers: 4,
+  }
 };
 
 var game = new Phaser.Game(config);
