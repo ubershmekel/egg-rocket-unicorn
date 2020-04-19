@@ -518,6 +518,8 @@ class GoodbyeScene extends Phaser.Scene {
     this.load.svg('robot', 'images/robot.svg');
     // this.load.image('robot-family', 'images/robot-family.png');
     this.load.image('robot-family', 'images/robot-family.svg');
+    this.load.image('forest-left', 'images/forest-left.svg');
+    this.load.image('forest-left-clump', 'images/forest-left-clump.svg');
     this.load.svg('robo-egg-unicorn', 'images/robo-egg-unicorn.svg');
     this.load.svg('scene-goodbye', 'images/scene-goodbye.svg');
     this.load.svg('thrust', 'images/thrust.svg');
@@ -531,8 +533,15 @@ class GoodbyeScene extends Phaser.Scene {
     this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-goodbye');
 
     this.add.image(this.game.scale.width * 0.91, this.game.scale.height * 0.7, 'robot-family');
+    
+    this.add.image(this.game.scale.width * 0.28, this.game.scale.height * 0.75, 'forest-left')
+      .setOrigin(1, 1);
 
     this.unicorn = this.add.sprite(this.game.scale.width * 0.6, 400, 'unicorn');
+
+    this.add.image(this.game.scale.width * 0.25, this.game.scale.height * 0.75, 'forest-left-clump')
+      .setOrigin(1, 0.5);
+
 
     createLanderPhysics(this, 'robot');
     this.robot.x = this.game.scale.width * 0.5;
@@ -549,7 +558,7 @@ class GoodbyeScene extends Phaser.Scene {
     this.tweens.add({
       targets: this.unicorn,
       x: "-=" + this.game.scale.width,
-      duration: 36000,
+      duration: 46000,
     });
   }
 
