@@ -75,17 +75,35 @@ function soundLoader(scene, soundUrls, volume=1.0) {
   return playRandom;
 }
 
-class Menu extends Phaser.Scene {
+const defaultFontStyle = {
+  fontFamily: 'Verdana, "Times New Roman", Tahoma, serif',
+  fontSize: '20px',
+}
+
+const colors = {
+  skyDay: Phaser.Display.Color.HexStringToColor("#6af"),
+  skyNight: Phaser.Display.Color.HexStringToColor("#369"),
+}
+
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class MenuScene extends Phaser.Scene {
   constructor () {
     super({
       key: "menu",
     });
   }
 
+  preload() {
+    this.load.svg('tree', 'images/tree.svg');
+  }
+
   create() {
-    this.debugText = this.add.text(10, 10, 'Egg Rocket', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
-    this.add.text(10, 200, 'Use WASD or arrow keys', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
+    this.debugText = this.add.text(10, 10, 'Eggggg', defaultFontStyle);
+    this.instructions = this.add.text(10, 400, 'Use WASD or arrow keys', defaultFontStyle);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
+    this.add.image(500, 700, 'tree');
   }
 
   update() {
@@ -93,12 +111,20 @@ class Menu extends Phaser.Scene {
     if (activeKeys.up || activeKeys.left || activeKeys.right) {
       this.scene.start('game');
     }
+    // this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
+    const skyPhase = (Math.cos(this.time.now * 0.001) + 1) * 5;
+    const hexColor = Phaser.Display.Color.Interpolate.ColorWithColor(colors.skyDay, colors.skyNight, 10, skyPhase);
+    // console.log(skyPhase, hexColor);
+    this.cameras.main.setBackgroundColor(hexColor);
   }
 }
 
 const softKeys = {};
 
-class EggSaver extends Phaser.Scene {
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class EggSaverScene extends Phaser.Scene {
 
   constructor (config) {
     super({
@@ -372,8 +398,8 @@ var config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    EggSaver,
-    Menu,
+    MenuScene,
+    EggSaverScene,
   ],
   physics: {
     default: "arcade",
