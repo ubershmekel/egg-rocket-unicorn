@@ -13,7 +13,8 @@ const defaultFontStyle = {
 
 const colors = {
   skyDay: Phaser.Display.Color.HexStringToColor("#6af"),
-  skyNight: Phaser.Display.Color.HexStringToColor("#369"),
+  skyLate: Phaser.Display.Color.HexStringToColor("#369"),
+  skyNight: Phaser.Display.Color.HexStringToColor("#024"),
 }
 
 const softKeys = {};
@@ -24,7 +25,7 @@ const softKeys = {};
 class MenuScene extends Phaser.Scene {
   constructor() {
     super({
-      key: "menu",
+      key: 'menu',
     });
   }
 
@@ -42,7 +43,7 @@ class MenuScene extends Phaser.Scene {
   create() {
     this.phase = 'waiting';
 
-    sceneCreate(this);
+    globalCreate(this);
 
     this.titleText = this.add.text(10, 300, 'Egg Rocket Unicorn', defaultFontStyle);
     this.instructionsText = this.add.text(10, 400, 'Use WASD or arrow keys', defaultFontStyle);
@@ -94,8 +95,6 @@ class MenuScene extends Phaser.Scene {
     const activeKeys = getActiveKeys(this.input.keyboard);
     if (this.phase === 'waiting') {
       if (activeKeys.up || activeKeys.left || activeKeys.right) {
-        // this.scene.start('game');
-        // this.animTreeUp.start()
         console.log("Egg dropping :(");
         this.phase = 'drop-egg';
         this.dropEgg();
@@ -103,26 +102,19 @@ class MenuScene extends Phaser.Scene {
 
       // this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
       const skyPhase = (Math.cos(this.time.now * 0.001) + 1) * 5;
-      const hexColor = Phaser.Display.Color.Interpolate.ColorWithColor(colors.skyDay, colors.skyNight, 10, skyPhase);
-      // console.log(skyPhase, hexColor);
-      this.cameras.main.setBackgroundColor(hexColor);
+      const rgbColor = Phaser.Display.Color.Interpolate.ColorWithColor(colors.skyDay, colors.skyLate, 10, skyPhase);
+      // console.log(skyPhase, rgbColor);
+      this.cameras.main.setBackgroundColor(rgbColor);
     }
 
     if (this.controlRobot) {
       handleLanderControls(this);
 
-      // check for robot rescue
-      const roboRect = this.robot.getBounds();
-      const eggRect = this.egg.getBounds();
-      const intersectionRect = Phaser.Geom.Rectangle.Intersection(roboRect, eggRect);
-      // The highest I got for `someOverlap` was 2000 when I was
-      // looking at it.
-      const someOverlap = 1000;
-      const intersectionArea = Phaser.Geom.Rectangle.Area(intersectionRect);
-      // console.log("inter area", intersectionArea);
-      if (intersectionArea > someOverlap) {
+      const overlap = overlappingAmount(this.robot, this.egg);
+      // console.log("inter area", overlap);
+      if (overlap > 0.5) {
         // Done with this scene, the egg was united with the robot.
-        this.scene.start('game');
+        this.scene.start('get-warm');
       }
     }
   }
@@ -152,7 +144,7 @@ class MenuScene extends Phaser.Scene {
   }
 
   windParticles() {
-    
+
     // Falling wind effect
     this.particles = this.add.particles('vertical-speed-particle');
     this.emitter = this.particles.createEmitter({
@@ -178,33 +170,35 @@ class MenuScene extends Phaser.Scene {
   }
 
   dropEgg() {
-    this.tweens.timeline({ tweens: [
-      {
-        targets: this.egg,
-        ease: 'Quad.easeIn',
-        duration: 2000,
-        rotation: -0.6,
-        onComplete: () => {
-          this.animTreeAway();
-          this.windParticles();
+    this.tweens.timeline({
+      tweens: [
+        {
+          targets: this.egg,
+          ease: 'Quad.easeIn',
+          duration: 2000,
+          rotation: -0.6,
+          onComplete: () => {
+            this.animTreeAway();
+            this.windParticles();
+          },
         },
-      },
-      {
-        targets: this.egg,
-        ease: 'Power1',
-        duration: 10000,
-        rotation: -Math.PI * 2,
-        x: this.game.scale.width / 2,
-        y: this.game.scale.height / 4,
-      },
-      {
-        targets: this.egg,
-        ease: 'Linear',
-        duration: 9000,
-        rotation: -Math.PI * 2,
-        repeat: -1,
-      }
-    ]});
+        {
+          targets: this.egg,
+          ease: 'Power1',
+          duration: 10000,
+          rotation: -Math.PI * 2,
+          x: this.game.scale.width / 2,
+          y: this.game.scale.height / 4,
+        },
+        {
+          targets: this.egg,
+          ease: 'Linear',
+          duration: 9000,
+          rotation: -Math.PI * 2,
+          repeat: -1,
+        }
+      ]
+    });
   }
 
   showRobot() {
@@ -232,7 +226,165 @@ class MenuScene extends Phaser.Scene {
     this.robot.visible = true;
   }
 }
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class GetWarmScene extends Phaser.Scene {
+  constructor() {
+    super({
+      key: 'get-warm',
+    });
+  }
 
+  preload() {
+    // this.load.svg('tree', 'images/tree.svg');
+    // this.load.svg('egg', 'images/egg.svg');
+    // this.load.svg('robot', 'images/robot.svg');
+    // this.load.svg('big-robot', 'images/big-robot.svg');
+    // this.load.image('vertical-speed-particle', 'images/vertical-speed-particle.png');
+
+    this.load.svg('lander', 'images/combined-lander.svg');
+    this.load.svg('thrust', 'images/thrust.svg');
+    this.load.svg('tree-clump', 'images/tree-clump.svg');
+    this.load.image('snowflake', 'images/snowflake.png');
+
+    globalPreload(this);
+  }
+
+  onCollided(objA, objB) {
+    // console.log('collided', objA, objB);
+  }
+
+  create() {
+    globalCreate(this);
+
+    createLanderPhysics(this, 'lander');
+
+    this.warmSpot = this.add.image(720, 50, 'thrust');
+
+    // Create obstacles
+    const passage = 200;
+    const thickness = 10;
+    this.walls = this.physics.add.group({
+      immovable: true,
+    });
+
+    this.walls.create(0,   420, 'tree-clump');
+    this.walls.create(150, 420, 'tree-clump');
+    this.walls.create(300, 420, 'tree-clump');
+    this.walls.create(450, 420, 'tree-clump');
+
+    this.walls.create(250, 180, 'tree-clump');
+    this.walls.create(400, 180, 'tree-clump');
+    this.walls.create(550, 180, 'tree-clump');
+    this.walls.create(700, 180, 'tree-clump');
+
+    this.physics.add.collider(
+      this.robot,
+      this.walls,
+      this.onCollided,
+      null,
+      this
+    );
+
+    // this.block1 = this.add.rectangle(this.game.scale.width / 2, this.game.scale.height / 2, this.game.scale.width - passage, thickness, 0x996633).setStrokeStyle(4, 0x3f953f);
+    // this.physics.add.existing(this.block1);
+    // this.block1.body.setImmovable();
+    //     this.physics.add.collider(
+    //   this.robot,
+    //   this.block1,
+    //   this.onCollided,
+    //   null,
+    //   this
+    // );
+
+    // initial robot spot
+    this.robot.x = 0;
+    this.robot.y = this.game.scale.height - this.robot.height;
+
+    // this.landerBase.setTint(0x9999ff);
+    // this.landerBase.setTint(0xffffff);
+
+    this.cameras.main.setBackgroundColor(colors.skyDay);
+
+    const maxValue = 1000;
+    this.tweens.addCounter({
+      from: 0,
+      to: maxValue,
+      duration: 5000,
+      onUpdate: (tween) => {
+        const skyPhase = Math.floor(tween.getValue());
+        const rgbColor = Phaser.Display.Color.Interpolate.ColorWithColor(colors.skyDay, colors.skyNight, maxValue, skyPhase);
+        this.cameras.main.setBackgroundColor(rgbColor);
+      }
+    });
+
+    const blue = Phaser.Display.Color.HexStringToColor('#6666ff');
+    const regular = Phaser.Display.Color.HexStringToColor('#ffffff');
+    this.tweens.addCounter({
+      from: 0,
+      to: maxValue,
+      yoyo: true,
+      repeat: -1,
+      ease: "Quad.easeInOut",
+      duration: 2000,
+      onUpdate: (tween) => {
+        const coldPhase = Math.floor(tween.getValue());
+        const rgbColor = Phaser.Display.Color.Interpolate.ColorWithColor(regular, blue, maxValue, coldPhase);
+        const hexColor = Phaser.Display.Color.ValueToColor(rgbColor).color;
+        this.landerBase.setTint(hexColor);
+      }
+    });
+
+    this.snowParticles();
+  }
+
+  snowParticles() {
+    // Falling wind effect
+    this.particles = this.add.particles('snowflake');
+    this.emitter = this.particles.createEmitter({
+      // frame: 'vertical-speed-particle',
+      x: { min: 0, max: this.game.scale.width },
+      y: { min: 0, max: this.game.scale.height },
+      lifespan: 4000,
+      speedX: { min: -2, max: 2 },
+      speedY: { min: 0, max: 50 },
+      // alpha: { start: 0, end: 1 },
+      // alpha: { onEmit: function(particle, key, t, value) {
+      //   console.log(t);
+      //   return 1 - 2 * Math.abs(t - 0.5);;
+      // }},
+      scale: { start: 0.5, end: 0.3 },
+      frequency: 311,
+      blendMode: 'ADD'
+    });
+    this.emitter.setAlpha(function (particle, key, t) {
+      // `t` is in the range of [0, 1], we lerp from 0 to 1 to 0.
+      return 1 - 2 * Math.abs(t - 0.5);
+    });
+    
+
+    // this.emitter.speedY = { min: -140, max: -590 };
+    // this.emitter.visible = false;
+
+    // put wind particles behind the tree
+    this.particles.setDepth(-100);
+    // this.emitter.on = false;
+  }
+
+  update() {
+    // const skyPhase = (Math.cos(this.time.now * 0.0001) + 1) * 5;
+    handleLanderControls(this);
+
+    const overlap = overlappingAmount(this.robot, this.warmSpot);
+    // console.log("inter area", overlap);
+    if (overlap > 0.5) {
+      // Done with this scene, the egg was united with the robot.
+      this.scene.start('eat');
+    }
+
+  }
+}
 ///////////////////////////////////////////////
 // Scene
 ///////////////////////////////////////////////
@@ -240,13 +392,13 @@ class EatRainbowsScene extends Phaser.Scene {
 
   constructor(config) {
     super({
-      key: "game",
+      key: 'eat',
     });
   }
 
   preload() {
-    this.load.svg('lander', 'images/combined-lander.svg');
     // this.load.image('lander', 'images/combined-lander.png');
+    this.load.svg('robo-egg-unicorn', 'images/robo-egg-unicorn.svg');
     this.load.svg('thrust', 'images/thrust.svg');
     this.load.svg('rainbow', 'images/rainbow.svg');
 
@@ -256,8 +408,7 @@ class EatRainbowsScene extends Phaser.Scene {
   }
 
   create() {
-    sceneCreate(this);
-  
+    globalCreate(this);
 
     // debug text
     this.debugText = this.add.text(0, 0, 'Debug text', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
@@ -285,8 +436,7 @@ class EatRainbowsScene extends Phaser.Scene {
     // Lander character
     //  Enable world bounds, but disable the floor
     this.physics.world.setBoundsCollision(true, true, true, true);
-    createLanderPhysics(this, 'lander')
-    
+    createLanderPhysics(this, 'robo-egg-unicorn')
 
     //  Our colliders
     this.physics.add.collider(
@@ -302,11 +452,11 @@ class EatRainbowsScene extends Phaser.Scene {
   hitBrick(ball, brick) {
     brick.disableBody(true, true);
     this.playChomp();
-    
-    this.scene.start('menu');
+
 
     if (this.bricks.countActive() === 0) {
-      this.resetLevel();
+      this.scene.start('menu');
+      // this.resetLevel();
     }
   }
 
@@ -325,8 +475,7 @@ class EatRainbowsScene extends Phaser.Scene {
   }
 
   hitPaddle(ball, paddle) {
-    var diff = 0;
-
+    // var diff = 0;
     //     if (ball.x < paddle.x) {
     //       //  Ball is on the left-hand side of the paddle
     //       diff = paddle.x - ball.x;
@@ -461,7 +610,7 @@ function createLanderPhysics(scene, landerImageName) {
   // scene.robot.setScale(0.1, 0.1);
   // scene.robot.setScale(4, 4);
   scene.robot.body.setGravityY(200);
-  scene.robot.body.setDrag(10, 10);
+  scene.robot.body.setDrag(100, 100);
 }
 
 function handleLanderControls(scene) {
@@ -515,8 +664,8 @@ function globalPreload(scene) {
   scene.load.audio(musicUrl, musicUrl);
 }
 
-function sceneCreate(scene) {
-  playMusic(scene);
+function globalCreate(scene) {
+  // playMusic(scene);
 
   if (isTouchScreen()) {
     createTouchButtons(scene);
@@ -588,13 +737,28 @@ function soundLoader(scene, soundUrls, volume = 1.0) {
   return playRandom;
 }
 
-var config = {
+function overlappingAmount(objA, objB, percent) {
+  // 0 = no overlap
+  // % = intersection_area / min_rect_area
+  // 1 = fully overlapping
+  const rectA = objA.getBounds();
+  const rectB = objB.getBounds();
+  const intersectionRect = Phaser.Geom.Rectangle.Intersection(rectA, rectB);
+  // The highest I got for `someOverlap` was 2000 when I was
+  // looking at it.
+  const minRectArea = Math.min(Phaser.Geom.Rectangle.Area(rectA), Phaser.Geom.Rectangle.Area(rectB));
+  const intersectionArea = Phaser.Geom.Rectangle.Area(intersectionRect);
+  return intersectionArea / minRectArea;
+}
+
+const config = {
   // type: Phaser.WEBGL,
   width: 800,
   height: 600,
   parent: "phaser-container",
   scene: [
     MenuScene,
+    GetWarmScene,
     EatRainbowsScene,
   ],
   physics: {
@@ -613,4 +777,4 @@ var config = {
   }
 };
 
-var game = new Phaser.Game(config);
+const game = new Phaser.Game(config);
