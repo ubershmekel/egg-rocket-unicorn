@@ -155,7 +155,7 @@ class MenuScene extends Phaser.Scene {
       alpha: { start: 0, end: 1 },
       scale: { start: 0.8, end: 0 },
       frequency: 31,
-      blendMode: 'ADD'
+      blendMode: 'ADD',
     });
 
     // this.emitter.speedY = { min: -140, max: -590 };
@@ -352,7 +352,7 @@ class GetWarmScene extends Phaser.Scene {
       frequency: 311,
       blendMode: 'ADD'
     });
-    this.emitter.setAlpha(function (particle, key, t) {
+    this.emitter.setAlpha(function (_particle, key, t) {
       // `t` is in the range of [0, 1], we lerp from 0 to 1 to 0.
       return 1 - 2 * Math.abs(t - 0.5);
     });
@@ -521,6 +521,7 @@ class GoodbyeScene extends Phaser.Scene {
     this.load.image('robot-family', 'images/robot-family.svg');
     this.load.image('forest-left', 'images/forest-left.svg');
     this.load.image('forest-left-clump', 'images/forest-left-clump.svg');
+    this.load.image('heart', 'images/heart.svg');
     this.load.svg('robo-egg-unicorn', 'images/robo-egg-unicorn.svg');
     this.load.svg('scene-goodbye', 'images/scene-goodbye.svg');
     this.load.svg('thrust', 'images/thrust.svg');
@@ -545,7 +546,9 @@ class GoodbyeScene extends Phaser.Scene {
     this.forest1 = this.add.image(this.game.scale.width * 0.28, this.game.scale.height * 0.75, 'forest-left')
       .setOrigin(1, 1);
 
-    this.unicorn = this.add.sprite(this.game.scale.width * 0.6, 400, 'unicorn');
+    this.unicorn = this.add.container(this.game.scale.width * 0.6, 400);
+    this.unicornImage = this.add.sprite(0, 0, 'unicorn');
+    this.unicorn.add(this.unicornImage);
 
     this.forest2 = this.add.image(this.game.scale.width * 0.25, this.game.scale.height * 0.75, 'forest-left-clump')
       .setOrigin(1, 0.5);
@@ -569,10 +572,34 @@ class GoodbyeScene extends Phaser.Scene {
       x: "-=" + this.game.scale.width,
       duration: 46000,
     });
+
+    this.createHeartsEmitter();
+  }
+
+  createHeartsEmitter() {
+    this.particles = this.add.particles('heart');
+    this.emitter = this.particles.createEmitter({
+      // frame: 'vertical-speed-particle',
+      x: {min: -10, max: 10},
+      y: {min: -10, max: 10},
+      lifespan: 1000,
+      speedX: { min: -40, max: 40 },
+      speedY: { min: -100, max: 100 },
+      scale: { start: 0.2, end: 0 },
+      frequency: 31,
+      blendMode: 'ADD',
+    });
+
+    this.unicorn.add(this.particles);
+
+    this.emitter.setAlpha(function (_particle, key, t) {
+      // `t` is in the range of [0, 1], we lerp from 0 to 1 to 0.
+      return (1 - 2 * Math.abs(t - 0.5)) * 0.5;
+    });
   }
 
   update(_timestamp, elapsedMs) {
-    this.unicorn.anims.play('left', true);
+    this.unicornImage.anims.play('left', true);
     handleLanderControls(this);
 
     // Count if the robot chose to be with the unicorn
@@ -595,7 +622,15 @@ class GoodbyeScene extends Phaser.Scene {
         fadeOutToScene(this, 'no-more-unicorn');
       }
     }
-    this.debugText.text = "" + unicornScreenOverlap;
+
+    const unicornRobotOverlap = rectOverlap(this.robot.getBounds(), this.unicornImage.getBounds());
+    if (unicornRobotOverlap > 0.5) {
+      this.emitter.on = true;
+    } else {
+      this.emitter.on = false;
+    }
+
+    // this.debugText.text = "" + unicornScreenOverlap;
   }
 }
 
@@ -645,8 +680,9 @@ class NoMoreUnicornScene extends Phaser.Scene {
 
   async create() {
     globalCreate(this);
-    await fadeInPromise(this, 1000, true);
     this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-robot-family-reunite');
+
+    await fadeInPromise(this, 1000, true);
     await sleep(3000);
 
     // slow fade out
@@ -998,9 +1034,9 @@ const config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    GetWarmScene,
-    GoodbyeScene,
     MenuScene,
+    GoodbyeScene,
+    GetWarmScene,
     EatRainbowsScene,
     FriendsForeverScene,
     NoMoreUnicornScene,
