@@ -1,7 +1,7 @@
 /* globals Phaser */
 
-// const debug = true;
-const debug = true;
+let debug = false;
+// debug = true;
 
 const defaultFontStyle = {
   fontFamily: 'Verdana, "Times New Roman", Tahoma, serif',
@@ -30,8 +30,11 @@ class MenuScene extends Phaser.Scene {
   preload() {
     this.load.svg('tree', 'images/tree.svg');
     this.load.svg('egg', 'images/egg.svg');
+    this.load.svg('robot', 'images/robot.svg');
     this.load.svg('big-robot', 'images/big-robot.svg');
     this.load.image('vertical-speed-particle', 'images/vertical-speed-particle.png');
+    this.load.svg('thrust', 'images/thrust.svg');
+
   }
 
   create() {
@@ -41,6 +44,15 @@ class MenuScene extends Phaser.Scene {
     this.tree = this.add.image(500, 700, 'tree');
     this.egg = this.add.image(450, 175, 'egg');
     this.egg.setDepth(-1);
+
+    // this.robot = this.add.image(370, 270, 'robot');
+    // this.robot.scale = 0.5;
+
+    createLanderPhysics(this, 'robot');
+    this.robot.x = this.game.scale.width - 10;
+    this.robot.y = this.game.scale.height - 10;
+    this.robot.visible = false;
+    this.controlRobot = false;
 
     this.roboBackground = this.add.triangle(
       500, 450,
@@ -84,6 +96,10 @@ class MenuScene extends Phaser.Scene {
       const hexColor = Phaser.Display.Color.Interpolate.ColorWithColor(colors.skyDay, colors.skyNight, 10, skyPhase);
       // console.log(skyPhase, hexColor);
       this.cameras.main.setBackgroundColor(hexColor);
+    }
+
+    if (this.controlRobot) {
+      handleLanderControls(this);
     }
   }
 
@@ -162,7 +178,7 @@ class MenuScene extends Phaser.Scene {
         ease: 'Linear',
         duration: 9000,
         rotation: -Math.PI * 2,
-        repeat: 1,
+        repeat: -1,
       }
     ]});
   }
@@ -170,6 +186,7 @@ class MenuScene extends Phaser.Scene {
   showRobot() {
     this.roboBackground.visible = true;
     this.bigRobot.visible = true;
+    this.controlRobot = true;
 
     // Robot shaking in fear for the egg
     this.tweens.add({
@@ -180,6 +197,15 @@ class MenuScene extends Phaser.Scene {
       repeat: -1,
       yoyo: true,
     });
+
+    this.tweens.add({
+      targets: [this.bigRobot, this.roboBackground],
+      alpha: 0,
+      delay: 3000,
+      duration: 2000,
+    });
+
+    this.robot.visible = true;
   }
 }
 
@@ -393,42 +419,12 @@ class EggSaverScene extends Phaser.Scene {
     //     }
   }
 
-  handleKeys() {
-    const thrust = 700;
-    const angleRate = 1.8;
-
-    const keys = getActiveKeys(this.input.keyboard);
-    if (keys.up) {
-      // Thrust!
-      this.thrust1.visible = true;
-      // this.thrust1.x = this.ball.body.x;
-      // this.thrust1.y = this.ball.body.y;
-
-      // Apply thrust based on current rotation of egg
-      const rads = this.ball.body.rotation * Math.PI / 180;
-      this.ball.body.acceleration.y = (-thrust) * Math.cos(rads);
-      this.ball.body.acceleration.x = (thrust) * Math.sin(rads);
-    } else {
-      this.thrust1.visible = false;
-      this.ball.body.acceleration.y = 0;
-      this.ball.body.acceleration.x = 0;
-    }
-
-    // Rotate the egg
-    if (keys.left) {
-      this.ball.body.rotation -= angleRate;
-    }
-    if (keys.right) {
-      this.ball.body.rotation += angleRate;
-    }
-  }
-
   update() {
     //console.log(this.ball.body.velocity.x);
 
     this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
 
-    this.handleKeys();
+    handleLanderControls(this);
 
 
     if (this.ball.y > 600) {
@@ -500,6 +496,70 @@ class Button extends Phaser.GameObjects.Rectangle {
 ///////////////////////////////////////////////
 // Functions
 ///////////////////////////////////////////////
+
+function createLanderPhysics(scene, landerImageName) {
+  scene.physics.world.setBoundsCollision(true, true, true, true);
+
+  // Lander base
+  scene.landerBase = scene.add.image(0, 0, landerImageName);
+  scene.landerBase.setDepth(1);
+
+  // thrust image
+  scene.thrust1 = scene.add.sprite(0, scene.landerBase.height / 2, 'thrust');
+  scene.thrust1.visible = false;
+
+  // Combined lander+thrust = robot
+  scene.robot = scene.add.container(300, 400, [scene.thrust1, scene.landerBase]);
+
+  scene.physics.world.enable(scene.robot);
+
+  // const radius = 230;
+  // this.ball.setInteractive(new Phaser.Geom.Circle(0, 0, radius), Phaser.Geom.Circle.Contains);
+  // scene.robot.body.setSize(40, 70);
+  scene.robot.body.setSize(scene.landerBase.width, scene.landerBase.height);
+  scene.robot.body.offset.x = -scene.landerBase.width / 2;
+  scene.robot.body.offset.y = -scene.landerBase.height / 2;
+
+  // scene.robot = this.physics.add.image(400, 400, "lander")
+  scene.robot.body.setCollideWorldBounds(true)
+  scene.robot.body.setBounce(0.5);
+  // scene.robot.body.setOrigin(0.5, 0.5);
+  // scene.robot.setScale(0.1, 0.1);
+  // scene.robot.setScale(4, 4);
+  scene.robot.body.setGravityY(200);
+  scene.robot.body.setDrag(10, 10);
+}
+
+function handleLanderControls(scene) {
+  const thrust = 700;
+  const angleRate = 1.8;
+
+  const keys = getActiveKeys(scene.input.keyboard);
+  if (keys.up) {
+    // Thrust!
+    scene.thrust1.visible = true;
+    // this.thrust1.x = this.ball.body.x;
+    // this.thrust1.y = this.ball.body.y;
+
+    // Apply thrust based on current rotation of egg
+    const rads = scene.robot.body.rotation * Math.PI / 180;
+    scene.robot.body.acceleration.y = (-thrust) * Math.cos(rads);
+    scene.robot.body.acceleration.x = (thrust) * Math.sin(rads);
+  } else {
+    scene.thrust1.visible = false;
+    scene.robot.body.acceleration.y = 0;
+    scene.robot.body.acceleration.x = 0;
+  }
+
+  // Rotate the egg
+  if (keys.left) {
+    scene.robot.body.rotation -= angleRate;
+  }
+  if (keys.right) {
+    scene.robot.body.rotation += angleRate;
+  }
+}
+
 function getActiveKeys(keyboard) {
   const codes = Phaser.Input.Keyboard.KeyCodes;
   const cursorKeys = keyboard.createCursorKeys();
