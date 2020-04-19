@@ -54,6 +54,10 @@ class MenuScene extends Phaser.Scene {
     this.robot.visible = false;
     this.controlRobot = false;
 
+    // Uncomment to hack to get to end of this level faster
+    // this.controlRobot = true;
+    // this.robot.visible = true;
+
     this.roboBackground = this.add.triangle(
       500, 450,
       this.game.scale.width, this.game.scale.height,
@@ -100,6 +104,20 @@ class MenuScene extends Phaser.Scene {
 
     if (this.controlRobot) {
       handleLanderControls(this);
+
+      // check for robot rescue
+      const roboRect = this.robot.getBounds();
+      const eggRect = this.egg.getBounds();
+      const intersectionRect = Phaser.Geom.Rectangle.Intersection(roboRect, eggRect);
+      // The highest I got for `someOverlap` was 2000 when I was
+      // looking at it.
+      const someOverlap = 1000;
+      const intersectionArea = Phaser.Geom.Rectangle.Area(intersectionRect);
+      // console.log("inter area", intersectionArea);
+      if (intersectionArea > someOverlap) {
+        // Done with this scene, the egg was united with the robot.
+        this.scene.start('game');
+      }
     }
   }
 
@@ -233,9 +251,6 @@ class EggSaverScene extends Phaser.Scene {
   create() {
     this.createTouchButtons();
 
-    //  Enable world bounds, but disable the floor
-    this.physics.world.setBoundsCollision(true, true, true, true);
-
     // debug text
     this.debugText = this.add.text(0, 0, 'Debug text', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
     this.debugText.visible = debug;
@@ -246,9 +261,9 @@ class EggSaverScene extends Phaser.Scene {
 
     //  Create the bricks in a 10x6 grid
     this.bricks = this.physics.add.staticGroup({
-      key: "bla",
-      frame: ["rainbow", "red1", "green1", "yellow1", "silver1", "purple1"],
-      frameQuantity: 10,
+      key: "rainbow",
+      // frame: ["rainbow", "red1", "green1", "yellow1", "silver1", "purple1"],
+      frameQuantity: 60,
       gridAlign: {
         width: 10,
         height: 6,
@@ -260,80 +275,20 @@ class EggSaverScene extends Phaser.Scene {
     });
 
     // Lander character
-
-    // Thrust image
-    this.thrust1 = this.add.sprite(0, 40, 'thrust');
-    this.thrust1.visible = false;
-
-    // Lander base
-    const landerBase = this.add.image(0, 0, 'lander');
-    // const thrust = this.add.image(0, 45, 'thrust');
-    this.ball = this.add.container(300, 400, [this.thrust1, landerBase]);
-    this.physics.world.enable(this.ball);
-
-    // const radius = 230;
-    // this.ball.setInteractive(new Phaser.Geom.Circle(0, 0, radius), Phaser.Geom.Circle.Contains);
-    this.ball.body.setSize(40, 70);
-    this.ball.body.offset.x = -20;
-    this.ball.body.offset.y = -30;
-
-    // this.ball = this.physics.add.image(400, 400, "lander")
-    this.ball.body.setCollideWorldBounds(true)
-    this.ball.body.setBounce(0.5);
-    // this.ball.body.setOrigin(0.5, 0.5);
-    // this.ball.setScale(0.1, 0.1);
-    // this.ball.setScale(4, 4);
-    this.ball.body.setGravityY(200);
-    this.ball.body.setDrag(10, 10);
-    this.ball.setData("onPaddle", true);
-
-
-
-    /*this.paddle = this.physics.add
-      .image(400, 550, "assets", "paddle1")
-      .setImmovable();*/
-
+    //  Enable world bounds, but disable the floor
+    this.physics.world.setBoundsCollision(true, true, true, true);
+    createLanderPhysics(this, 'lander')
+    
 
     //  Our colliders
     this.physics.add.collider(
-      this.ball,
+      this.robot,
       this.bricks,
       this.hitBrick,
       null,
       this
     );
-    // this.physics.add.collider(
-    //   this.ball,
-    //   this.paddle,
-    //   this.hitPaddle,
-    //   null,
-    //   this
-    // );
 
-    //  Input events
-    this.input.on(
-      "pointermove",
-      function (pointer) {
-        //  Keep the paddle within the game
-        //         this.paddle.x = Phaser.Math.Clamp(pointer.x, 52, 748);
-
-        //         if (this.ball.getData("onPaddle")) {
-        //           this.ball.x = this.paddle.x;
-        //         }
-      },
-      this
-    );
-
-    // this.input.on(
-    //   "pointerup",
-    //   function(pointer) {
-    //     if (this.ball.getData("onPaddle")) {
-    //       // this.ball.setVelocity(-75, -300);
-    //       this.ball.setData("onPaddle", false);
-    //     }
-    //   },
-    //   this
-    // );
   }
 
   createTouchButtons() {
@@ -390,7 +345,7 @@ class EggSaverScene extends Phaser.Scene {
   resetBall() {
     // this.ball.setVelocity(0);
     // this.ball.setPosition(this.paddle.x, 500);
-    this.ball.setData("onPaddle", true);
+    // this.ball.setData("onPaddle", true);
   }
 
   resetLevel() {
@@ -422,14 +377,13 @@ class EggSaverScene extends Phaser.Scene {
   update() {
     //console.log(this.ball.body.velocity.x);
 
-    this.debugText.setText(`rotation ${this.ball.body.rotation.toFixed(1)} x: ${this.ball.body.x.toFixed(1)} y: ${this.ball.body.y.toFixed(1)}`)
+    this.debugText.setText(`rotation ${this.robot.body.rotation.toFixed(1)} x: ${this.robot.body.x.toFixed(1)} y: ${this.robot.body.y.toFixed(1)}`)
 
     handleLanderControls(this);
 
-
-    if (this.ball.y > 600) {
-      this.resetBall();
-    }
+    // if (this.ball.y > 600) {
+    //   this.resetBall();
+    // }
   }
 }
 
@@ -597,7 +551,7 @@ var config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    MenuScene,
+    // MenuScene,
     EggSaverScene,
   ],
   physics: {
