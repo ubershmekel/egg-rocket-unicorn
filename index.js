@@ -1,7 +1,7 @@
 /* globals Phaser */
 
 // const debug = true;
-const debug = false;
+const debug = true;
 
 const defaultFontStyle = {
   fontFamily: 'Verdana, "Times New Roman", Tahoma, serif',
@@ -30,18 +30,33 @@ class MenuScene extends Phaser.Scene {
   preload() {
     this.load.svg('tree', 'images/tree.svg');
     this.load.svg('egg', 'images/egg.svg');
+    this.load.svg('big-robot', 'images/big-robot.svg');
     this.load.image('vertical-speed-particle', 'images/vertical-speed-particle.png');
   }
 
   create() {
-    this.titleText = this.add.text(10, 10, 'Egg Rocket Unicorn', defaultFontStyle);
-    this.instructionsText = this.add.text(10, 400, 'Use WASD or arrow keys', defaultFontStyle);
+    this.titleText = this.add.text(10, 300, 'Egg Rocket Unicorn', defaultFontStyle);
+    this.instructionsText = this.add.text(10, 500, 'Use WASD or arrow keys', defaultFontStyle);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
     this.tree = this.add.image(500, 700, 'tree');
     this.egg = this.add.image(450, 175, 'egg');
     this.egg.setDepth(-1);
 
+    this.roboBackground = this.add.triangle(
+      500, 450,
+      this.game.scale.width, this.game.scale.height,
+      0, this.game.scale.height,
+      this.game.scale.width, 0,
+    );
+    // this.roboBackground.lineWidth = 10;
+    this.roboBackground.setStrokeStyle(10, 0x000000);
+    this.roboBackground.setFillStyle(0xffffff);
 
+    this.bigRobot = this.add.image(670, 470, 'big-robot');
+    this.bigRobot.rotation = -Math.PI / 5;
+
+    this.roboBackground.visible = false;
+    this.bigRobot.visible = false;
 
     // tween.onComplete.add(this.startMatch, this);
     // this.animTreeUp = this.tweens.add({
@@ -76,6 +91,10 @@ class MenuScene extends Phaser.Scene {
     this.tweens.add({
       targets: [this.titleText, this.instructionsText],
       alpha: 0,
+      duration: 6000,
+      // Note I can't assign `onComplete: this.showRobot` because that causes
+      // `showRobot` to have an invalide `this` inside it.
+      onComplete: () => this.showRobot(),
     })
     this.tweens.timeline({
       targets: this.tree,
@@ -123,7 +142,7 @@ class MenuScene extends Phaser.Scene {
       {
         targets: this.egg,
         ease: 'Quad.easeIn',
-        duration: 3000,
+        duration: 2000,
         rotation: -0.6,
         onComplete: () => {
           this.animTreeAway();
@@ -146,8 +165,21 @@ class MenuScene extends Phaser.Scene {
         repeat: 1,
       }
     ]});
+  }
 
+  showRobot() {
+    this.roboBackground.visible = true;
+    this.bigRobot.visible = true;
 
+    // Robot shaking in fear for the egg
+    this.tweens.add({
+      targets: this.bigRobot,
+      x: '+= 3',
+      y: '+= 4',
+      duration: 250,
+      repeat: -1,
+      yoyo: true,
+    });
   }
 }
 
