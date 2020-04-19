@@ -36,15 +36,16 @@ class MenuScene extends Phaser.Scene {
     this.load.image('vertical-speed-particle', 'images/vertical-speed-particle.png');
     this.load.svg('thrust', 'images/thrust.svg');
 
+    globalPreload(this);
   }
 
   create() {
     this.phase = 'waiting';
-    
-    playMusic(this);
+
+    sceneCreate(this);
 
     this.titleText = this.add.text(10, 300, 'Egg Rocket Unicorn', defaultFontStyle);
-    this.instructionsText = this.add.text(10, 500, 'Use WASD or arrow keys', defaultFontStyle);
+    this.instructionsText = this.add.text(10, 400, 'Use WASD or arrow keys', defaultFontStyle);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
     this.tree = this.add.image(500, 700, 'tree');
     this.egg = this.add.image(450, 175, 'egg');
@@ -251,13 +252,12 @@ class EatRainbowsScene extends Phaser.Scene {
 
     this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.2);
 
-    this.load.audio(musicUrl, musicUrl);
+    globalPreload(this);
   }
 
   create() {
-    playMusic(this);
-
-    this.createTouchButtons();
+    sceneCreate(this);
+  
 
     // debug text
     this.debugText = this.add.text(0, 0, 'Debug text', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
@@ -297,48 +297,6 @@ class EatRainbowsScene extends Phaser.Scene {
       this
     );
 
-  }
-
-  createTouchButtons() {
-    const buttonWidth = 80;
-    this.leftButton = new Button({
-      scene: this,
-      x: 0,
-      y: this.game.scale.height - 100,
-      width: buttonWidth,
-      height: 100,
-      text: "⬅a",
-      bgColor: 0xff0000,
-      textColor: 0xffffff,
-      onDown: () => softKeys.left = true,
-      onUp: () => softKeys.left = false,
-    })
-
-    this.rightButton = new Button({
-      scene: this,
-      x: buttonWidth + 10,
-      y: this.game.scale.height - 100,
-      width: buttonWidth,
-      height: 100,
-      text: "d➡",
-      bgColor: 0xff0000,
-      textColor: 0xffffff,
-      onDown: () => softKeys.right = true,
-      onUp: () => softKeys.right = false,
-    })
-
-    this.upButton = new Button({
-      scene: this,
-      x: this.game.scale.width - buttonWidth,
-      y: this.game.scale.height - 100,
-      width: buttonWidth,
-      height: 100,
-      text: "w⬆",
-      bgColor: 0xff0000,
-      textColor: 0xffffff,
-      onDown: () => softKeys.up = true,
-      onUp: () => softKeys.up = false,
-    })
   }
 
   hitBrick(ball, brick) {
@@ -553,6 +511,68 @@ function getActiveKeys(keyboard) {
   }
 }
 
+function globalPreload(scene) {
+  scene.load.audio(musicUrl, musicUrl);
+}
+
+function sceneCreate(scene) {
+  playMusic(scene);
+
+  if (isTouchScreen()) {
+    createTouchButtons(scene);
+  }
+}
+
+function isTouchScreen() {
+  if ('ontouchstart' in document.documentElement) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function createTouchButtons(scene) {
+  const buttonWidth = 80;
+  scene.leftButton = new Button({
+    scene: scene,
+    x: 0,
+    y: scene.game.scale.height - 100,
+    width: buttonWidth,
+    height: 100,
+    text: "⬅a",
+    bgColor: 0xff0000,
+    textColor: 0xffffff,
+    onDown: () => softKeys.left = true,
+    onUp: () => softKeys.left = false,
+  })
+
+  scene.rightButton = new Button({
+    scene: scene,
+    x: buttonWidth + 10,
+    y: scene.game.scale.height - 100,
+    width: buttonWidth,
+    height: 100,
+    text: "d➡",
+    bgColor: 0xff0000,
+    textColor: 0xffffff,
+    onDown: () => softKeys.right = true,
+    onUp: () => softKeys.right = false,
+  })
+
+  scene.upButton = new Button({
+    scene: scene,
+    x: scene.game.scale.width - buttonWidth,
+    y: scene.game.scale.height - 100,
+    width: buttonWidth,
+    height: 100,
+    text: "w⬆",
+    bgColor: 0xff0000,
+    textColor: 0xffffff,
+    onDown: () => softKeys.up = true,
+    onUp: () => softKeys.up = false,
+  })
+}
+
 function randomItem(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -574,8 +594,8 @@ var config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    EatRainbowsScene,
     MenuScene,
+    EatRainbowsScene,
   ],
   physics: {
     default: "arcade",
