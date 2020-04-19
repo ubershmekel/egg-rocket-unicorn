@@ -1,11 +1,13 @@
-/* globals Phaser console document window */
+/* globals Phaser */
 
 let debug = false;
-// debug = true;
 
 const musicUrl = "audio/music-sad-loop-reverb.mp3";
 let musicStarted = false;
-musicStarted = true;
+
+// Comment these out before shipping
+// debug = true;
+// musicStarted = true;
 
 const defaultFontStyle = {
   fontFamily: 'Verdana, "Times New Roman", Tahoma, serif',
@@ -41,9 +43,9 @@ class MenuScene extends Phaser.Scene {
     globalPreload(this);
   }
 
-  create() {
+  async create() {
     this.phase = 'waiting';
-
+    
     globalCreate(this);
 
     this.titleText = this.add.text(10, 300, 'Egg Rocket Unicorn', defaultFontStyle);
@@ -82,6 +84,7 @@ class MenuScene extends Phaser.Scene {
     this.roboBackground.visible = false;
     this.bigRobot.visible = false;
 
+    fadeInPromise(this, 1000, true);
   }
 
   update() {
@@ -103,11 +106,11 @@ class MenuScene extends Phaser.Scene {
     if (this.controlRobot) {
       handleLanderControls(this);
 
-      const overlap = overlappingAmount(this.robot, this.egg);
+      const overlap = rectOverlap(this.robot.getBounds(), this.egg.getBounds());
       // console.log("inter area", overlap);
       if (overlap > 0.5) {
         // Done with this scene, the egg was united with the robot.
-        this.scene.start('get-warm');
+        fadeOutToScene(this, 'get-warm');
       }
     }
   }
@@ -256,6 +259,7 @@ class GetWarmScene extends Phaser.Scene {
     createLanderPhysics(this, 'lander');
 
     this.warmSpot = this.add.image(720, 50, 'thrust');
+    this.warmSpot.rotation = Math.PI;
 
     // Create obstacles
     this.walls = this.physics.add.group({
@@ -371,11 +375,12 @@ class GetWarmScene extends Phaser.Scene {
     // const skyPhase = (Math.cos(this.time.now * 0.0001) + 1) * 5;
     handleLanderControls(this);
 
-    const overlap = overlappingAmount(this.robot, this.warmSpot);
+    const overlap = rectOverlap(this.robot.getBounds(), this.warmSpot.getBounds());
     // console.log("inter area", overlap);
     if (overlap > 0.5) {
       // Done with this scene, the egg was united with the robot.
-      this.scene.start('eat');
+      // this.scene.start('eat');
+      fadeOutToScene(this, 'eat');
     }
 
   }
@@ -398,7 +403,7 @@ class EatRainbowsScene extends Phaser.Scene {
     this.load.svg('thrust', 'images/thrust.svg');
     this.load.svg('rainbow', 'images/rainbow.svg');
 
-    this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.2);
+    this.playChomp = soundLoader(this, ['audio/chomp1.mp3', 'audio/chomp2.mp3', 'audio/chomp3.mp3'], 0.5);
 
     globalPreload(this);
   }
@@ -451,7 +456,7 @@ class EatRainbowsScene extends Phaser.Scene {
 
 
     if (this.bricks.countActive() === 0) {
-      this.scene.start('menu');
+      fadeOutToScene(this, 'goodbye');
       // this.resetLevel();
     }
   }
@@ -509,8 +514,9 @@ class GoodbyeScene extends Phaser.Scene {
     super({
       key: 'goodbye',
     });
-  }
 
+    this.timeInForestMs = 0;
+  }
   
   preload() {
     globalPreload(this);
@@ -530,23 +536,30 @@ class GoodbyeScene extends Phaser.Scene {
   create() {
     globalCreate(this);
 
-    this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-goodbye');
+    this.debugText = this.add.text(0, 0, 'Debug text', defaultFontStyle);
+    this.debugText.setDepth(999);
+    this.debugText.visible = debug;
+
+
+    this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-goodbye');
 
     this.add.image(this.game.scale.width * 0.91, this.game.scale.height * 0.7, 'robot-family');
     
-    this.add.image(this.game.scale.width * 0.28, this.game.scale.height * 0.75, 'forest-left')
+    // messing with `setOrigin to make it easier to align with the unicorn
+    this.forest1 = this.add.image(this.game.scale.width * 0.28, this.game.scale.height * 0.75, 'forest-left')
       .setOrigin(1, 1);
 
     this.unicorn = this.add.sprite(this.game.scale.width * 0.6, 400, 'unicorn');
 
-    this.add.image(this.game.scale.width * 0.25, this.game.scale.height * 0.75, 'forest-left-clump')
+    this.forest2 = this.add.image(this.game.scale.width * 0.25, this.game.scale.height * 0.75, 'forest-left-clump')
       .setOrigin(1, 0.5);
+
+    this.allForestRect = Phaser.Geom.Rectangle.Union(this.forest1.getBounds(), this.forest2.getBounds());
 
 
     createLanderPhysics(this, 'robot');
     this.robot.x = this.game.scale.width * 0.5;
     this.robot.y = this.game.scale.height * 0.6;
-
 
     this.anims.create({
       key: 'left',
@@ -562,11 +575,89 @@ class GoodbyeScene extends Phaser.Scene {
     });
   }
 
-  update() {
+  update(_timestamp, elapsedMs) {
     this.unicorn.anims.play('left', true);
     handleLanderControls(this);
+
+    // Count if the robot chose to be with the unicorn
+    const robotForestOverlap = rectOverlap(this.robot.getBounds(), this.allForestRect);
+    if (robotForestOverlap > 0.8) {
+      // this.debugText.text = "overlapping";
+      this.timeInForestMs += elapsedMs;
+    } else {
+      // this.debugText.text = "nope";
+      this.timeInForestMs = 0;
+    }
+
+    // notice when the unicorn leaves
+    const unicornScreenOverlap = rectOverlap(this.bg.getBounds(), this.unicorn.getBounds());
+    if (unicornScreenOverlap < 0.5) {
+      // unicorn is about to exit, is the robot with it?
+      if (this.timeInForestMs > 2000) {
+        fadeOutToScene(this, 'friends-forever');
+      } else {
+        fadeOutToScene(this, 'no-more-unicorn');
+      }
+    }
+    this.debugText.text = "" + unicornScreenOverlap;
   }
 }
+
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class FriendsForeverScene extends Phaser.Scene {
+
+  constructor() {
+    super({
+      key: 'friends-forever',
+    });
+
+    this.timeInForestMs = 0;
+  }
+  
+  preload() {
+    globalPreload(this);
+    this.load.image('scene-horse-robot-reunite', 'images/scene-horse-robot-reunite.svg');
+  }
+
+  create() {
+    this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-horse-robot-reunite');
+  }
+}
+
+
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class NoMoreUnicornScene extends Phaser.Scene {
+
+  constructor() {
+    super({
+      key: 'no-more-unicorn',
+    });
+
+    this.timeInForestMs = 0;
+  }
+  
+  preload() {
+    globalPreload(this);
+    this.load.image('scene-robot-family-reunite', 'images/scene-robot-family-reunite.svg');
+  }
+
+  async create() {
+    globalCreate(this);
+    this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-robot-family-reunite');
+    await fadeInPromise(this, 1000, true);
+    await sleep(3000);
+
+    // slow fade out
+    await fadeInPromise(this, 6000, false);
+    // fadeOutToScene(this, 'menu');
+    this.scene.start('menu');
+  }
+}
+
 
 ///////////////////////////////////////////////
 // UI
@@ -631,13 +722,51 @@ class Button extends Phaser.GameObjects.Rectangle {
 // Functions
 ///////////////////////////////////////////////
 
+let isFadeActive = false;
+async function fadeOutToScene(scene, toSceneName) {
+  if (isFadeActive) {
+    console.log("Already fading out", toSceneName);
+    return;
+  }
+
+  console.log("Fading out to scene", toSceneName);
+  isFadeActive = true;
+  await fadeInPromise(scene, 1000, false);
+  scene.scene.start(toSceneName);
+  isFadeActive = false;
+
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function fadeInPromise(scene, duration, isFadeIn) {
+  const prom = new Promise((resolve, _reject) => {
+    const progressCallback = (_cam, progress) => {
+      if (progress > 0.99) {
+        // done fading
+        resolve();
+      }
+    };
+    const red = 0, green = 0, blue = 0;
+    if (isFadeIn) {
+      scene.cameras.main.fadeIn(duration, red, green, blue, progressCallback);
+    } else {
+      scene.cameras.main.fadeOut(duration, red, green, blue, progressCallback);
+    }
+    
+  });
+  return prom;
+}
+
 function playMusic(scene) {
   if (musicStarted) {
     console.log("music already playing");
   } else {
     musicStarted = true;
     scene.sound.play(musicUrl, {
-      volume: 0.3,
+      volume: 0.5,
       loop: true,
     });
   }
@@ -800,12 +929,10 @@ function soundLoader(scene, soundUrls, volume = 1.0) {
   return playRandom;
 }
 
-function overlappingAmount(objA, objB) {
+function rectOverlap(rectA, rectB) {
   // 0 = no overlap
   // % = intersection_area / min_rect_area
   // 1 = fully overlapping
-  const rectA = objA.getBounds();
-  const rectB = objB.getBounds();
   const intersectionRect = Phaser.Geom.Rectangle.Intersection(rectA, rectB);
   // The highest I got for `someOverlap` was 2000 when I was
   // looking at it.
@@ -868,10 +995,12 @@ const config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    GoodbyeScene,
     MenuScene,
     GetWarmScene,
+    NoMoreUnicornScene,
     EatRainbowsScene,
+    GoodbyeScene,
+    FriendsForeverScene,
   ],
   physics: {
     default: "arcade",

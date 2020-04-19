@@ -2,6 +2,13 @@
 {
   "extends": "eslint:recommended",
   "parserOptions": {
-    "ecmaVersion": 6
+    "ecmaVersion": 2017
+  },
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "rules": {
+    "no-unused-vars": [2, {"args": "after-used", "argsIgnorePattern": "^_"}]
   }
 }
