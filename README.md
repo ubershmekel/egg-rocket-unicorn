@@ -1,4 +1,4 @@
-# u46
+# Egg Rocket Unicorn
 
 Ludum Dare 46 attempt.
 
