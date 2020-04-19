@@ -44,10 +44,11 @@ class MenuScene extends Phaser.Scene {
   }
 
   async create() {
+    globalCreate(this);
+    fadeInPromise(this, 1000, true);
+
     this.phase = 'waiting';
     
-    globalCreate(this);
-
     this.titleText = this.add.text(10, 300, 'Egg Rocket Unicorn', defaultFontStyle);
     this.instructionsText = this.add.text(10, 400, 'Use WASD or arrow keys', defaultFontStyle);
     this.cameras.main.backgroundColor = Phaser.Display.Color.HexStringToColor("#6af");
@@ -84,7 +85,6 @@ class MenuScene extends Phaser.Scene {
     this.roboBackground.visible = false;
     this.bigRobot.visible = false;
 
-    fadeInPromise(this, 1000, true);
   }
 
   update() {
@@ -255,6 +255,7 @@ class GetWarmScene extends Phaser.Scene {
 
   create() {
     globalCreate(this);
+    fadeInPromise(this, 1000, true);
 
     createLanderPhysics(this, 'lander');
 
@@ -410,6 +411,7 @@ class EatRainbowsScene extends Phaser.Scene {
 
   create() {
     globalCreate(this);
+    fadeInPromise(this, 1000, true);
 
     // debug text
     this.debugText = this.add.text(0, 0, 'Debug text', { fontFamily: 'Verdana, "Times New Roman", Tahoma, serif' });
@@ -535,6 +537,7 @@ class GoodbyeScene extends Phaser.Scene {
 
   create() {
     globalCreate(this);
+    fadeInPromise(this, 1000, true);
 
     this.debugText = this.add.text(0, 0, 'Debug text', defaultFontStyle);
     this.debugText.setDepth(999);
@@ -622,6 +625,8 @@ class FriendsForeverScene extends Phaser.Scene {
   }
 
   create() {
+    globalCreate(this);
+    fadeInPromise(this, 1000, true);
     this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-horse-robot-reunite');
   }
 }
@@ -647,8 +652,8 @@ class NoMoreUnicornScene extends Phaser.Scene {
 
   async create() {
     globalCreate(this);
-    this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-robot-family-reunite');
     await fadeInPromise(this, 1000, true);
+    this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-robot-family-reunite');
     await sleep(3000);
 
     // slow fade out
@@ -995,12 +1000,12 @@ const config = {
   height: 600,
   parent: "phaser-container",
   scene: [
-    MenuScene,
+    GoodbyeScene,
     GetWarmScene,
+    MenuScene,
+    FriendsForeverScene,
     NoMoreUnicornScene,
     EatRainbowsScene,
-    GoodbyeScene,
-    FriendsForeverScene,
   ],
   physics: {
     default: "arcade",
@@ -1018,5 +1023,6 @@ const config = {
   }
 };
 
+
 // eslint-disable-next-line no-unused-vars
-const game = new Phaser.Game(config);
+const _game = new Phaser.Game(config);
