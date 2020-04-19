@@ -1,4 +1,4 @@
-/* globals Phaser */
+/* globals Phaser console document window */
 
 let debug = false;
 // debug = true;
@@ -69,7 +69,7 @@ class MenuScene extends Phaser.Scene {
       500, 450,
       this.game.scale.width, this.game.scale.height,
       0, this.game.scale.height,
-      this.game.scale.width, 0,
+      this.game.scale.width, 0
     );
     // this.roboBackground.lineWidth = 10;
     this.roboBackground.setStrokeStyle(10, 0x000000);
@@ -80,14 +80,6 @@ class MenuScene extends Phaser.Scene {
 
     this.roboBackground.visible = false;
     this.bigRobot.visible = false;
-
-    // tween.onComplete.add(this.startMatch, this);
-    // this.animTreeUp = this.tweens.add({
-    //   targetthis.tree).to( { x: 700, y: -600 }, 2000, "Quart.easeOut");
-    // tweenB = this.add.tween(this.egg).to( { x: 400, y: 400 }, 2000, "Quart.easeOut");
-    // this.animTreeUp.chain(tweenB);
-
-    // game.input.onDown.addOnce(start, this);
 
   }
 
@@ -127,7 +119,8 @@ class MenuScene extends Phaser.Scene {
       // Note I can't assign `onComplete: this.showRobot` because that causes
       // `showRobot` to have an invalide `this` inside it.
       onComplete: () => this.showRobot(),
-    })
+    });
+    
     this.tweens.timeline({
       targets: this.tree,
       ease: 'Power1',
@@ -251,7 +244,8 @@ class GetWarmScene extends Phaser.Scene {
     globalPreload(this);
   }
 
-  onCollided(objA, objB) {
+  // eslint-disable-next-line no-unused-vars
+  onCollided(objA_, _objB) {
     // console.log('collided', objA, objB);
   }
 
@@ -263,8 +257,6 @@ class GetWarmScene extends Phaser.Scene {
     this.warmSpot = this.add.image(720, 50, 'thrust');
 
     // Create obstacles
-    const passage = 200;
-    const thickness = 10;
     this.walls = this.physics.add.group({
       immovable: true,
     });
@@ -287,6 +279,8 @@ class GetWarmScene extends Phaser.Scene {
       this
     );
 
+    // const passage = 200;
+    // const thickness = 10;
     // this.block1 = this.add.rectangle(this.game.scale.width / 2, this.game.scale.height / 2, this.game.scale.width - passage, thickness, 0x996633).setStrokeStyle(4, 0x3f953f);
     // this.physics.add.existing(this.block1);
     // this.block1.body.setImmovable();
@@ -385,12 +379,13 @@ class GetWarmScene extends Phaser.Scene {
 
   }
 }
+
 ///////////////////////////////////////////////
 // Scene
 ///////////////////////////////////////////////
 class EatRainbowsScene extends Phaser.Scene {
 
-  constructor(config) {
+  constructor() {
     super({
       key: 'eat',
     });
@@ -474,7 +469,7 @@ class EatRainbowsScene extends Phaser.Scene {
     });
   }
 
-  hitPaddle(ball, paddle) {
+  // hitPaddle(ball, paddle) {
     // var diff = 0;
     //     if (ball.x < paddle.x) {
     //       //  Ball is on the left-hand side of the paddle
@@ -489,7 +484,7 @@ class EatRainbowsScene extends Phaser.Scene {
     //       //  Add a little random X to stop it bouncing straight up!
     //       ball.setVelocityX(2 + Math.random() * 8);
     //     }
-  }
+  // }
 
   update() {
     //console.log(this.ball.body.velocity.x);
@@ -504,6 +499,46 @@ class EatRainbowsScene extends Phaser.Scene {
   }
 }
 
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class GoodbyeScene extends Phaser.Scene {
+
+  constructor() {
+    super({
+      key: 'goodbye',
+    });
+  }
+
+  
+  preload() {
+    globalPreload(this);
+
+    // this.load.image('lander', 'images/combined-lander.png');
+    this.load.svg('robo-egg-unicorn', 'images/robo-egg-unicorn.svg');
+    this.load.svg('thrust', 'images/thrust.svg');
+    this.load.spritesheet('unicorn', 'images/unicorn-walk-left.png', { frameWidth: 100, frameHeight: 100 });
+
+  }
+
+  create() {
+    globalCreate(this);
+
+    this.unicorn = this.add.sprite(200, 200, 'unicorn');
+
+    this.anims.create({
+      key: 'left',
+      frames: this.anims.generateFrameNumbers('unicorn', { start: 0, end: 1 }),
+      frameRate: 1,
+      repeat: -1
+    });
+
+  }
+
+  update() {
+    this.unicorn.anims.play('left', true);
+  }
+}
 
 ///////////////////////////////////////////////
 // UI
@@ -610,7 +645,7 @@ function createLanderPhysics(scene, landerImageName) {
   // scene.robot.setScale(0.1, 0.1);
   // scene.robot.setScale(4, 4);
   scene.robot.body.setGravityY(200);
-  scene.robot.body.setDrag(100, 100);
+  scene.robot.body.setDrag(80, 80);
 }
 
 function handleLanderControls(scene) {
@@ -737,7 +772,7 @@ function soundLoader(scene, soundUrls, volume = 1.0) {
   return playRandom;
 }
 
-function overlappingAmount(objA, objB, percent) {
+function overlappingAmount(objA, objB) {
   // 0 = no overlap
   // % = intersection_area / min_rect_area
   // 1 = fully overlapping
@@ -789,6 +824,7 @@ function exitFullScreen() {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function toggleFullScreen(elem) {
   // based on https://stackoverflow.com/questions/36672561/how-to-exit-fullscreen-onclick-using-javascript
   if (isInFullScreen()) {
@@ -804,6 +840,7 @@ const config = {
   height: 600,
   parent: "phaser-container",
   scene: [
+    GoodbyeScene,
     MenuScene,
     GetWarmScene,
     EatRainbowsScene,
@@ -824,4 +861,5 @@ const config = {
   }
 };
 
+// eslint-disable-next-line no-unused-vars
 const game = new Phaser.Game(config);
