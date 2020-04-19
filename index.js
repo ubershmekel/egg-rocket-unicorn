@@ -751,6 +751,53 @@ function overlappingAmount(objA, objB, percent) {
   return intersectionArea / minRectArea;
 }
 
+function isInFullScreen() {
+  const document = window.document;
+  return (
+    (document.fullscreenElement && document.fullscreenElement !== null) ||
+    (document.webkitFullscreenElement &&
+      document.webkitFullscreenElement !== null) ||
+    (document.mozFullScreenElement && document.mozFullScreenElement !== null) ||
+    (document.msFullscreenElement && document.msFullscreenElement !== null)
+  );
+}
+
+function requestFullScreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) {
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullScreen) {
+    elem.webkitRequestFullScreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  } else {
+    console.warn("Did not find request full screen method", elem);
+  }
+}
+
+function exitFullScreen() {
+  const document = window.document;
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+}
+
+function toggleFullScreen(elem) {
+  // based on https://stackoverflow.com/questions/36672561/how-to-exit-fullscreen-onclick-using-javascript
+  if (isInFullScreen()) {
+    exitFullScreen();
+  } else {
+    requestFullScreen(elem || document.body);
+  }
+}
+
 const config = {
   // type: Phaser.WEBGL,
   width: 800,

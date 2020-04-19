@@ -32,13 +32,17 @@
 <body>
   <h1>u46</h1>
 
-  <button onclick="window.location.reload(true)">refresh</button>
+  <div class="tinker-buttons">
+    <button onclick="toggleFullScreen(document.getElementById('phaser-container'))">fullscreen</button>
+    <button onclick="game.sound.mute = !game.sound.mute">mute</button>
+    <button onclick="window.location.reload(true)">refresh</button>
+  </div>
 
   <div id="phaser-container"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.22.0/phaser.min.js"
     integrity="sha256-opIOArWpfmA6kZLZN7Jj7tSbFeIdvafkfZsI8p17OTc=" crossorigin="anonymous"></script>
-  <script src="index.js?cache-1"></script>
+  <script src="index.js?cache-1xaz"></script>
 
   <p>
     This site is hosted by Glitch. Check out the code by clicking the fish in the top right.
