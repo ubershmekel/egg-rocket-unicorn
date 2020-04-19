@@ -1000,9 +1000,9 @@ const config = {
   height: 600,
   parent: "phaser-container",
   scene: [
+    MenuScene,
     GoodbyeScene,
     GetWarmScene,
-    MenuScene,
     FriendsForeverScene,
     NoMoreUnicornScene,
     EatRainbowsScene,
