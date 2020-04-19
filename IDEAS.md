@@ -60,5 +60,8 @@ Follow a math path, but it might be too deterministic
   3rd - head on top is hungry for food, fly to get a worm
   4th - 
 
+# Lessons learned
 
+- Phaser has pixels in mind, so SVGs lose their sharpness. Kind of a bummer
+- SVGs that have non-round sizes like 123.75x192.1312 look extra blurry. Make sure the page size is rounded like 124x193
 

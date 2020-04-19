@@ -5,6 +5,7 @@ let debug = false;
 
 const musicUrl = "audio/music-sad-loop-reverb.mp3";
 let musicStarted = false;
+musicStarted = true;
 
 const defaultFontStyle = {
   fontFamily: 'Verdana, "Times New Roman", Tahoma, serif',
@@ -514,8 +515,11 @@ class GoodbyeScene extends Phaser.Scene {
   preload() {
     globalPreload(this);
 
-    // this.load.image('lander', 'images/combined-lander.png');
+    this.load.svg('robot', 'images/robot.svg');
+    // this.load.image('robot-family', 'images/robot-family.png');
+    this.load.image('robot-family', 'images/robot-family.svg');
     this.load.svg('robo-egg-unicorn', 'images/robo-egg-unicorn.svg');
+    this.load.svg('scene-goodbye', 'images/scene-goodbye.svg');
     this.load.svg('thrust', 'images/thrust.svg');
     this.load.spritesheet('unicorn', 'images/unicorn-walk-left.png', { frameWidth: 100, frameHeight: 100 });
 
@@ -524,19 +528,34 @@ class GoodbyeScene extends Phaser.Scene {
   create() {
     globalCreate(this);
 
-    this.unicorn = this.add.sprite(200, 200, 'unicorn');
+    this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-goodbye');
+
+    this.add.image(this.game.scale.width * 0.91, this.game.scale.height * 0.7, 'robot-family');
+
+    this.unicorn = this.add.sprite(this.game.scale.width * 0.6, 400, 'unicorn');
+
+    createLanderPhysics(this, 'robot');
+    this.robot.x = this.game.scale.width * 0.5;
+    this.robot.y = this.game.scale.height * 0.6;
+
 
     this.anims.create({
       key: 'left',
-      frames: this.anims.generateFrameNumbers('unicorn', { start: 0, end: 1 }),
-      frameRate: 1,
+      frames: this.anims.generateFrameNumbers('unicorn', { start: 1, end: 2 }),
+      frameRate: 3,
       repeat: -1
     });
 
+    this.tweens.add({
+      targets: this.unicorn,
+      x: "-=" + this.game.scale.width,
+      duration: 36000,
+    });
   }
 
   update() {
     this.unicorn.anims.play('left', true);
+    handleLanderControls(this);
   }
 }
 
@@ -856,7 +875,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   input: {
-    // Allow hitting more than one soft button at a time
+    // Allow pressing more than one virtual button at a time
     activePointers: 4,
   }
 };
