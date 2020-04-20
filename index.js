@@ -60,7 +60,7 @@ class MenuScene extends Phaser.Scene {
     // this.robot.scale = 0.5;
 
     createLanderPhysics(this, 'robot');
-    this.robot.x = this.game.scale.width - 10;
+    this.robot.x = this.game.scale.width * 0.85;
     this.robot.y = this.game.scale.height - 10;
     this.robot.visible = false;
     this.controlRobot = false;
@@ -418,8 +418,8 @@ class EatRainbowsScene extends Phaser.Scene {
     this.bricks = this.physics.add.staticGroup({
       key: "rainbow",
       // frame: ["rainbow", "red1", "green1", "yellow1", "silver1", "purple1"],
-      frameQuantity: 6,
-      // frameQuantity: 60,
+      // frameQuantity: 6,
+      frameQuantity: 60,
       gridAlign: {
         width: 10,
         height: 6,
@@ -697,7 +697,7 @@ class NoMoreUnicornScene extends Phaser.Scene {
 // UI
 ///////////////////////////////////////////////
 class Button extends Phaser.GameObjects.Rectangle {
-  constructor({ scene, x, y, width, height, text, bgColor, textColor, onDown, onUp }) {
+  constructor({ scene, x, y, width, height, text, onDown, onUp }) {
     super(scene, x, y);
 
     const padding = 10;
@@ -706,16 +706,14 @@ class Button extends Phaser.GameObjects.Rectangle {
     this.setOrigin(0, 0);
 
     const style = { align: "center", fontSize: '30px' };
-    this.label = scene.add.text(x + padding, y + padding, text, style)
+    this.textObj = scene.add.text(x + padding, y + padding, text, style)
 
-    // const labelWidth = this.label.width + padding;
-    // const labelHeight = this.label.height + padding;
+    // const labelWidth = this.textObj.width + padding;
+    // const labelHeight = this.textObj.height + padding;
     // this.width = labelWidth >= minimumWidth ? labelWidth : minimumWidth;
     // this.height = labelHeight >= minimumHeight ? labelHeight : minimumHeight;
     this.width = width;
     this.height = height;
-    this.bgColor = bgColor;
-    this.textColor = textColor;
     this.text = text;
 
     this.setInteractive({ useHandCursor: true })
@@ -733,8 +731,14 @@ class Button extends Phaser.GameObjects.Rectangle {
     }
 
     this.enterMenuButtonRestState();
-    this.label.setColor(0x00ff00);
+
+    this.textObj.setColor(0xff0000);
+
+    this.textObj.setAlpha(0.5);
     this.setAlpha(0.5);
+    
+    this.textObj.setDepth(9999);
+    this.setDepth(999);
   }
 
   enterMenuButtonHoverState() {
@@ -742,12 +746,12 @@ class Button extends Phaser.GameObjects.Rectangle {
   }
 
   enterMenuButtonRestState() {
-    // this.label.setColor('#FFFFFF');
+    // this.textObj.setColor('#FFFFFF');
     this.setFillStyle(0xffffff);
   }
 
   enterMenuButtonActiveState() {
-    // this.label.setColor('#BBBBBB');
+    // this.textObj.setColor('#BBBBBB');
     this.setFillStyle(0x444444);
   }
 }
@@ -915,9 +919,7 @@ function createTouchButtons(scene) {
     y: scene.game.scale.height - 100,
     width: buttonWidth,
     height: 100,
-    text: "⬅a",
-    bgColor: 0xff0000,
-    textColor: 0xffffff,
+    text: "←",
     onDown: () => softKeys.left = true,
     onUp: () => softKeys.left = false,
   });
@@ -928,9 +930,7 @@ function createTouchButtons(scene) {
     y: scene.game.scale.height - 100,
     width: buttonWidth,
     height: 100,
-    text: "d➡",
-    bgColor: 0xff0000,
-    textColor: 0xffffff,
+    text: "→",
     onDown: () => softKeys.right = true,
     onUp: () => softKeys.right = false,
   });
@@ -941,16 +941,10 @@ function createTouchButtons(scene) {
     y: scene.game.scale.height - 100,
     width: buttonWidth,
     height: 100,
-    text: "w⬆",
-    bgColor: 0xff0000,
-    textColor: 0xffffff,
+    text: "↑",
     onDown: () => softKeys.up = true,
     onUp: () => softKeys.up = false,
   });
-
-  scene.upButton.setDepth(9999);
-  scene.leftButton.setDepth(9999);
-  scene.rightButton.setDepth(9999);
 }
 
 function randomItem(items) {
@@ -1035,9 +1029,9 @@ const config = {
   parent: "phaser-container",
   scene: [
     MenuScene,
+    EatRainbowsScene,
     GoodbyeScene,
     GetWarmScene,
-    EatRainbowsScene,
     FriendsForeverScene,
     NoMoreUnicornScene,
   ],
