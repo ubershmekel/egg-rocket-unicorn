@@ -23,3 +23,8 @@ h1 {
 .tinker-buttons {
   margin-bottom: 1em
 }
+
+footer a {
+  display: block;
+  margin: 1em 0;
+}
