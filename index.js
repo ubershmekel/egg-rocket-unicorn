@@ -110,7 +110,7 @@ class MenuScene extends Phaser.Scene {
       // console.log("inter area", overlap);
       if (overlap > 0.5) {
         // Done with this scene, the egg was united with the robot.
-        fadeOutToScene(this, 'get-warm');
+        fadeOutToScene(this, 'landed-safely');
       }
     }
   }
@@ -223,6 +223,60 @@ class MenuScene extends Phaser.Scene {
     this.robot.visible = true;
   }
 }
+
+
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class LandedSafelyScene extends Phaser.Scene {
+  constructor() {
+    super({
+      key: 'landed-safely',
+    });
+  }
+
+  preload() {
+    this.load.image('robot-saves-egg', 'images/scene-robot-saves-egg.svg');
+
+    globalPreload(this);
+  }
+
+  async create() {
+    globalCreate(this);
+    fadeInPromise(this, 1000, true);
+    this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'robot-saves-egg');
+    await sleep(2500);
+    fadeOutToScene(this, 'get-warm');
+   }
+}
+
+
+///////////////////////////////////////////////
+// Scene
+///////////////////////////////////////////////
+class NowWarmScene extends Phaser.Scene {
+  constructor() {
+    super({
+      key: 'now-warm',
+    });
+  }
+
+  preload() {
+    this.load.image('scene-egg-cracks', 'images/scene-egg-cracks.svg');
+
+    globalPreload(this);
+  }
+
+  async create() {
+    globalCreate(this);
+    fadeInPromise(this, 1000, true);
+    this.bg = this.add.image(this.game.scale.width / 2, this.game.scale.height / 2, 'scene-egg-cracks');
+    await sleep(2500);
+    fadeOutToScene(this, 'eat');
+   }
+}
+
+
 ///////////////////////////////////////////////
 // Scene
 ///////////////////////////////////////////////
@@ -243,7 +297,7 @@ class GetWarmScene extends Phaser.Scene {
   }
 
   // eslint-disable-next-line no-unused-vars
-  onCollided(objA_, _objB) {
+  onCollided(_objA, _objB) {
     // console.log('collided', objA, objB);
   }
 
@@ -357,13 +411,8 @@ class GetWarmScene extends Phaser.Scene {
       return 1 - 2 * Math.abs(t - 0.5);
     });
     
-
-    // this.emitter.speedY = { min: -140, max: -590 };
-    // this.emitter.visible = false;
-
     // put wind particles behind the tree
     this.particles.setDepth(-100);
-    // this.emitter.on = false;
   }
 
   update() {
@@ -373,9 +422,7 @@ class GetWarmScene extends Phaser.Scene {
     const overlap = rectOverlap(this.robot.getBounds(), this.warmSpot.getBounds());
     // console.log("inter area", overlap);
     if (overlap > 0.5) {
-      // Done with this scene, the egg was united with the robot.
-      // this.scene.start('eat');
-      fadeOutToScene(this, 'eat');
+      fadeOutToScene(this, 'now-warm');
     }
 
   }
@@ -1029,11 +1076,13 @@ const config = {
   parent: "phaser-container",
   scene: [
     MenuScene,
+    LandedSafelyScene,
     EatRainbowsScene,
     GoodbyeScene,
     GetWarmScene,
     FriendsForeverScene,
     NoMoreUnicornScene,
+    NowWarmScene,
   ],
   physics: {
     default: "arcade",
@@ -1050,7 +1099,6 @@ const config = {
     activePointers: 4,
   }
 };
-
 
 // eslint-disable-next-line no-unused-vars
 const _game = new Phaser.Game(config);
